@@ -1,0 +1,77 @@
+<% content_for :title, "ログイン | FAX原稿AI" %>
+
+<div class="login-page">
+  <section class="login-brand" aria-label="FAX原稿AIについて">
+    <div class="product-logo product-logo-large">
+      <span>▦</span>
+    </div>
+    <div>
+      <p class="product-title">FAX原稿<span>AI</span></p>
+      <p class="product-byline">by NEXLINK</p>
+    </div>
+
+    <div class="login-copy">
+      <h1>FAXDM原稿をAIでかんたん作成</h1>
+      <p>ターゲットや目的に合わせて、効果的なFAX原稿をすばやく生成します。</p>
+    </div>
+
+    <ul class="login-benefits" aria-label="利用メリット">
+      <li>
+        <span>✦</span>
+        <div>
+          <strong>AIが最適な原稿を自動生成</strong>
+          <small>ターゲットに響く訴求力の高い文章を提案</small>
+        </div>
+      </li>
+      <li>
+        <span>◷</span>
+        <div>
+          <strong>作業時間を大幅に削減</strong>
+          <small>原稿作成の手間を減らし、業務効率を向上</small>
+        </div>
+      </li>
+      <li>
+        <span>盾</span>
+        <div>
+          <strong>安心・安全なセキュリティ</strong>
+          <small>企業の大切な情報を守る堅牢な管理体制</small>
+        </div>
+      </li>
+    </ul>
+
+    <p class="login-footer">© 2026 NEXLINK Co., Ltd. All Rights Reserved.</p>
+  </section>
+
+  <section class="login-panel" aria-label="ログインフォーム">
+    <div class="login-help">？ ヘルプ</div>
+
+    <div class="login-card">
+      <h2>ログイン</h2>
+      <%= render "shared/flash" %>
+
+      <%= form_with url: login_path, class: "login-form" do |form| %>
+        <label>
+          メールアドレス
+          <%= form.email_field :email, value: "demo@nexlink.example", autocomplete: "email", placeholder: "メールアドレスを入力してください" %>
+        </label>
+
+        <label>
+          パスワード
+          <%= form.password_field :password, value: "password", autocomplete: "current-password", placeholder: "パスワードを入力してください" %>
+        </label>
+
+        <label class="checkbox-row">
+          <%= form.check_box :remember_me %>
+          <span>ログイン状態を保持する</span>
+        </label>
+
+        <%= form.submit "ログイン", class: "primary-submit" %>
+      <% end %>
+
+      <div class="divider"><span>または</span></div>
+      <a href="#" class="text-link">パスワードをお忘れの方</a>
+    </div>
+
+    <p class="login-note">🔒 NEXLINK利用企業向け</p>
+  </section>
+</div>

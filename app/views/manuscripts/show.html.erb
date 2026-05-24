@@ -1,0 +1,82 @@
+<% content_for :title, "#{@manuscript.title} | FAX原稿AI" %>
+
+<div class="app-shell">
+  <%= render "shared/sidebar", active: :manuscripts %>
+
+  <main class="main-area">
+    <%= render "shared/topbar" %>
+    <%= render "shared/flash" %>
+
+    <section class="page-heading">
+      <div>
+        <p class="breadcrumb"><%= link_to "原稿一覧", manuscripts_path %> ＞ 原稿詳細</p>
+        <h1>原稿詳細</h1>
+        <p>生成した原稿の詳細と編集・再生成ができます。</p>
+      </div>
+      <div class="heading-actions">
+        <%= link_to "原稿一覧に戻る", manuscripts_path, class: "secondary-button" %>
+        <%= link_to "PDFダウンロード", pdf_manuscript_path(@manuscript), class: "secondary-button" %>
+        <%= button_to "複製", duplicate_manuscript_path(@manuscript), method: :post, class: "secondary-button" %>
+        <%= button_to "削除", manuscript_path(@manuscript), method: :delete, class: "danger-button" %>
+      </div>
+    </section>
+
+    <div class="detail-layout">
+      <section class="preview-card">
+        <h2>原稿プレビュー <small>（A4・モノクロ・FAX送信用）</small></h2>
+        <% if @manuscript.generated? %>
+          <%= image_tag preview_image_manuscript_path(@manuscript), class: "fax-image", alt: "生成されたFAX原稿プレビュー" %>
+        <% else %>
+          <div class="empty-preview">
+            <h3>まだ生成されていません</h3>
+            <%= button_to "生成開始", generate_manuscript_path(@manuscript), method: :post, class: "primary-button" %>
+          </div>
+        <% end %>
+      </section>
+
+      <aside class="detail-side">
+        <section class="info-card">
+          <h2>原稿情報</h2>
+          <dl class="info-list">
+            <dt>サービス名</dt>
+            <dd><%= @manuscript.service_name %></dd>
+            <dt>ターゲット</dt>
+            <dd><%= @manuscript.target %></dd>
+            <dt>目的・用途</dt>
+            <dd><%= @manuscript.purpose %></dd>
+            <dt>連絡方法</dt>
+            <dd><%= @manuscript.contact_methods %></dd>
+            <dt>更新日</dt>
+            <dd><%= l(@manuscript.updated_at, format: :long) %></dd>
+            <dt>ステータス</dt>
+            <dd><mark class="status-badge <%= status_badge_class(@manuscript.status) %>"><%= @manuscript.status_label %></mark></dd>
+          </dl>
+        </section>
+
+        <section class="info-card">
+          <h2>編集・再生成</h2>
+          <%= form_with url: regenerate_manuscript_path(@manuscript), class: "regenerate-form" do |form| %>
+            <%= form.text_area :edit_instruction, rows: 6, maxlength: 500, placeholder: "例）電話番号をもっと大きくしてください\n緊急感を強めてください\nキャッチコピーを変更してください" %>
+            <%= form.submit "再生成する", class: "primary-submit" %>
+          <% end %>
+          <p class="form-hint">具体的な指示ほど、意図に近い結果になります。</p>
+        </section>
+
+        <section class="info-card">
+          <h2>バージョン履歴</h2>
+          <div class="version-list">
+            <% @versions.each do |version| %>
+              <article>
+                <strong>v<%= version.version_number %><%= "（この原稿）" if version == @versions.first %></strong>
+                <small><%= l(version.created_at, format: :long) %></small>
+                <% if version.edit_instruction.present? %>
+                  <p><%= version.edit_instruction %></p>
+                <% end %>
+              </article>
+            <% end %>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+</div>

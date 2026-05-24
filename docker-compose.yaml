@@ -19,6 +19,7 @@ services:
       DATABASE_USERNAME: root
       DATABASE_PASSWORD: password
       TZ: Asia/Tokyo
+      RUBYOPT: --parser=parse.y
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
     depends_on:
       database:

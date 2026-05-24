@@ -1,252 +1,69 @@
-<% content_for :title, "FAX原稿AI" %>
+<% content_for :title, "原稿一覧 | FAX原稿AI" %>
 
 <div class="app-shell">
-  <aside class="sidebar" aria-label="メインメニュー">
-    <div class="brand-mark">
-      <span class="brand-symbol">F</span>
-      <div>
-        <p class="brand-name">FAX原稿AI</p>
-        <p class="brand-company">NEXLINK利用企業向け</p>
-      </div>
-    </div>
+  <%= render "shared/sidebar", active: :manuscripts %>
 
-    <nav class="side-nav">
-      <a class="side-nav-item active" href="/manuscripts">
-        <span class="nav-icon" aria-hidden="true">□</span>
-        原稿一覧
-      </a>
-      <a class="side-nav-item" href="#new-manuscript">
-        <span class="nav-icon" aria-hidden="true">＋</span>
-        新規作成
-      </a>
-      <a class="side-nav-item" href="#templates">
-        <span class="nav-icon" aria-hidden="true">◇</span>
-        テンプレート
-      </a>
-      <a class="side-nav-item" href="#account">
-        <span class="nav-icon" aria-hidden="true">○</span>
-        アカウント
-      </a>
-    </nav>
+  <main class="main-area">
+    <%= render "shared/topbar" %>
+    <%= render "shared/flash" %>
 
-    <div class="account-card" id="account">
-      <p class="eyebrow">ログイン中</p>
-      <p class="account-name">山田 花子</p>
-      <p class="account-meta">株式会社サンプルマーケティング</p>
-    </div>
-  </aside>
-
-  <main class="workspace">
-    <header class="topbar">
+    <section class="page-heading">
       <div>
-        <p class="eyebrow">Manuscripts</p>
-        <h1>FAXDM原稿管理</h1>
+        <h1>原稿一覧</h1>
+        <p>作成したFAX原稿を一覧で確認・管理できます。</p>
       </div>
-
-      <div class="topbar-actions">
-        <label class="search-box">
-          <span aria-hidden="true">⌕</span>
-          <input type="search" placeholder="タイトル、サービス名、ターゲットで検索">
-        </label>
-        <a class="primary-action" href="#new-manuscript">新規作成</a>
-      </div>
-    </header>
-
-    <section class="summary-strip" aria-label="原稿ステータス">
-      <div>
-        <span class="summary-value">12</span>
-        <span class="summary-label">自分の原稿</span>
-      </div>
-      <div>
-        <span class="summary-value">8</span>
-        <span class="summary-label">PDF出力済み</span>
-      </div>
-      <div>
-        <span class="summary-value">3</span>
-        <span class="summary-label">保存テンプレート</span>
-      </div>
-      <div>
-        <span class="summary-value">1</span>
-        <span class="summary-label">再生成待ち</span>
+      <div class="heading-actions">
+        <%= link_to "絞り込みをクリア", manuscripts_path, class: "secondary-button" %>
+        <%= link_to "＋ 新規作成", new_manuscript_path, class: "primary-button" %>
       </div>
     </section>
 
-    <div class="content-grid">
-      <section class="panel manuscripts-panel" aria-labelledby="manuscript-list-title">
-        <div class="panel-header">
-          <div>
-            <p class="eyebrow">List</p>
-            <h2 id="manuscript-list-title">原稿一覧</h2>
-          </div>
-          <div class="segmented-control" aria-label="絞り込み">
-            <button type="button" class="active">すべて</button>
-            <button type="button">生成済み</button>
-            <button type="button">下書き</button>
-          </div>
-        </div>
+    <%= form_with url: manuscripts_path, method: :get, class: "filter-bar" do |form| %>
+      <%= form.search_field :q, value: params[:q], placeholder: "原稿タイトル・サービス名・ターゲットで検索" %>
+      <%= form.select :status, [["ステータス：すべて", ""], ["完成", "generated"], ["レビュー中", "reviewing"], ["下書き", "draft"]], selected: params[:status] %>
+      <%= form.submit "検索", class: "secondary-button" %>
+    <% end %>
 
-        <div class="manuscript-table">
-          <div class="table-row table-head">
-            <span class="title-cell">原稿</span>
-            <span class="target-cell">ターゲット</span>
-            <span class="status-cell">状態</span>
-            <span class="updated-cell">更新日時</span>
-            <span class="actions-cell"></span>
-          </div>
-
-          <% @manuscripts.each do |manuscript| %>
-            <article class="table-row manuscript-row">
-              <div class="manuscript-title-cell title-cell">
-                <span class="thumb" aria-hidden="true"></span>
-                <div>
-                  <h3><%= manuscript[:title] %></h3>
-                  <p><%= manuscript[:service] %></p>
-                </div>
-              </div>
-              <span class="target-cell"><%= manuscript[:target] %></span>
-              <span class="status-cell">
-                <mark class="status-badge <%= manuscript[:status] == "生成済み" ? "done" : manuscript[:status] == "下書き" ? "draft" : "waiting" %>">
-                  <%= manuscript[:status] %>
-                </mark>
-              </span>
-              <span class="updated-cell"><%= manuscript[:updated_at] %></span>
-              <div class="row-actions actions-cell">
-                <button type="button" aria-label="詳細">詳細</button>
-                <button type="button" aria-label="複製">複製</button>
-              </div>
-            </article>
-          <% end %>
-        </div>
-      </section>
-
-      <aside class="panel preview-panel" aria-labelledby="preview-title">
-        <div class="panel-header tight">
-          <div>
-            <p class="eyebrow">Preview</p>
-            <h2 id="preview-title">原稿詳細</h2>
-          </div>
-          <button type="button" class="ghost-button">PDF</button>
-        </div>
-
-        <div class="fax-preview" aria-label="FAX原稿プレビュー">
-          <div class="fax-header">FAX DM</div>
-          <h3>介護施設の夜間見守りを、もっと確実に。</h3>
-          <p>CareWatch Cloud は設置しやすい見守りカメラと通知機能で、夜間巡回の負担を軽減します。</p>
-          <div class="fax-callout">無料相談受付中</div>
-          <dl>
-            <div>
-              <dt>TEL</dt>
-              <dd>03-1234-5678</dd>
-            </div>
-            <div>
-              <dt>FAX</dt>
-              <dd>03-1234-5679</dd>
-            </div>
-          </dl>
-        </div>
-
-        <label class="instruction-box">
-          編集指示
-          <textarea rows="4">電話番号を大きくして、導入実績を強調してください。</textarea>
-        </label>
-
-        <div class="preview-actions">
-          <button type="button" class="secondary-action">再生成</button>
-          <button type="button" class="ghost-button">複製</button>
-          <button type="button" class="danger-button">削除</button>
-        </div>
-      </aside>
-    </div>
-
-    <section class="creation-layout" id="new-manuscript" aria-labelledby="creation-title">
-      <div class="panel creation-panel">
-        <div class="panel-header">
-          <div>
-            <p class="eyebrow">Create</p>
-            <h2 id="creation-title">新規作成</h2>
-          </div>
-          <button type="button" class="secondary-action">テンプレート保存</button>
-        </div>
-
-        <ol class="stepper">
-          <li class="current">
-            <span>1</span>
-            基本情報
-          </li>
-          <li>
-            <span>2</span>
-            訴求設計
-          </li>
-          <li>
-            <span>3</span>
-            掲載情報
-          </li>
-          <li>
-            <span>4</span>
-            確認
-          </li>
-        </ol>
-
-        <form class="draft-form">
-          <label>
-            原稿タイトル
-            <input type="text" value="介護施設向け見守りカメラ提案">
-          </label>
-          <label>
-            サービス名
-            <input type="text" value="CareWatch Cloud">
-          </label>
-          <label class="wide-field">
-            サービス概要
-            <textarea rows="4">夜間巡回や見守り業務の負担を軽減する、介護施設向けクラウドカメラサービス。</textarea>
-          </label>
-          <label>
-            対象地域
-            <input type="text" value="関東エリア">
-          </label>
-          <label>
-            問い合わせ導線
-            <select>
-              <option>電話とFAX返信</option>
-              <option>Webフォーム</option>
-              <option>資料請求</option>
-            </select>
-          </label>
-        </form>
+    <section class="table-card">
+      <div class="table-row table-head">
+        <span>原稿タイトル</span>
+        <span>サービス名</span>
+        <span>ターゲット</span>
+        <span>ステータス</span>
+        <span>更新日</span>
+        <span>操作</span>
       </div>
 
-      <aside class="panel support-panel" id="templates" aria-labelledby="template-title">
-        <div class="panel-header tight">
+      <% @manuscripts.each do |manuscript| %>
+        <article class="table-row manuscript-row">
           <div>
-            <p class="eyebrow">Templates</p>
-            <h2 id="template-title">テンプレート</h2>
+            <strong><%= manuscript.title %></strong>
+            <small><%= truncate(manuscript.service_summary, length: 42) %></small>
           </div>
-        </div>
+          <span><%= manuscript.service_name %></span>
+          <span><%= manuscript.target %></span>
+          <span><mark class="status-badge <%= status_badge_class(manuscript.status) %>"><%= manuscript.status_label %></mark></span>
+          <span><%= l(manuscript.updated_at, format: :short) %></span>
+          <div class="row-actions">
+            <%= link_to "詳細", manuscript_path(manuscript), class: "icon-button" %>
+            <%= button_to "複製", duplicate_manuscript_path(manuscript), method: :post, class: "icon-button" %>
+            <%= button_to "削除", manuscript_path(manuscript), method: :delete, class: "danger-button" %>
+          </div>
+        </article>
+      <% end %>
 
-        <div class="template-list">
-          <% @templates.each do |template| %>
-            <article>
-              <span aria-hidden="true">◇</span>
-              <div>
-                <h3><%= template %></h3>
-                <p>保存済みフォーム内容を初期値として読み込み</p>
-              </div>
-              <button type="button">使用</button>
-            </article>
-          <% end %>
+      <% if @manuscripts.empty? %>
+        <div class="empty-state">
+          <h2>まだ原稿がありません</h2>
+          <p>新規作成から、最初のFAXDM原稿を作成してください。</p>
+          <%= link_to "新規作成へ", new_manuscript_path, class: "primary-button" %>
         </div>
-
-        <div class="process-card">
-          <p class="eyebrow">Generation Flow</p>
-          <ol>
-            <li>フォーム入力</li>
-            <li>AI構成案生成</li>
-            <li>画像生成</li>
-            <li>PDF化</li>
-            <li>原稿保存</li>
-          </ol>
-        </div>
-      </aside>
+      <% end %>
     </section>
+
+    <div class="list-footer">
+      <span>全 <%= @manuscripts.size %> 件を表示</span>
+      <%= link_to "テンプレート一覧を見る", templates_path, class: "text-link" %>
+    </div>
   </main>
 </div>

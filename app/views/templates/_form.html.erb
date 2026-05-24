@@ -1,0 +1,103 @@
+<%= form_with model: template, class: "wizard-form template-form" do |form| %>
+  <% if template.errors.any? %>
+    <div class="form-errors">
+      <strong>入力内容を確認してください。</strong>
+      <ul>
+        <% template.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <section class="form-card">
+    <h2>テンプレート情報</h2>
+    <div class="field-grid">
+      <label>
+        テンプレートタイトル
+        <%= form.text_field :title, placeholder: "例）足場工事向け・電話訴求型" %>
+      </label>
+      <label>
+        説明
+        <%= form.text_field :description, placeholder: "例）工務店への新規開拓向け" %>
+      </label>
+      <label>
+        会社名
+        <%= form.text_field :company_name %>
+      </label>
+      <label>
+        サービス名 <em>必須</em>
+        <%= form.text_field :service_name %>
+      </label>
+      <label class="wide">
+        サービス概要 <em>必須</em>
+        <%= form.text_area :service_summary, rows: 4 %>
+      </label>
+      <label>
+        対象地域
+        <%= form.text_field :target_region %>
+      </label>
+      <label>
+        ターゲット <em>必須</em>
+        <%= form.text_field :target %>
+      </label>
+      <label>
+        FAXDMの目的 <em>必須</em>
+        <%= form.text_field :purpose %>
+      </label>
+      <label>
+        問い合わせ導線 <em>必須</em>
+        <%= form.text_field :contact_methods %>
+      </label>
+      <label>
+        キャッチコピー
+        <%= form.text_field :catch_copy %>
+      </label>
+      <label class="wide">
+        強み・特徴
+        <%= form.text_area :strengths, rows: 3 %>
+      </label>
+      <label class="wide">
+        今すぐ問い合わせる理由
+        <%= form.text_area :urgency_reason, rows: 3 %>
+      </label>
+      <label>
+        電話番号
+        <%= form.text_field :phone_number %>
+      </label>
+      <label>
+        FAX番号
+        <%= form.text_field :fax_number %>
+      </label>
+      <label>
+        メールアドレス
+        <%= form.email_field :email %>
+      </label>
+      <label>
+        WebサイトURL
+        <%= form.url_field :website_url %>
+      </label>
+      <label>
+        受付時間
+        <%= form.text_field :reception_hours %>
+      </label>
+      <label>
+        会社住所
+        <%= form.text_area :address, rows: 3 %>
+      </label>
+      <label>
+        信頼情報
+        <%= form.text_area :credibility, rows: 3 %>
+      </label>
+      <label>
+        配信停止文言
+        <%= form.text_area :opt_out_notice, rows: 3 %>
+      </label>
+    </div>
+  </section>
+
+  <div class="sticky-actions">
+    <%= link_to "戻る", templates_path, class: "secondary-button" %>
+    <%= form.submit "保存", class: "primary-submit" %>
+  </div>
+<% end %>

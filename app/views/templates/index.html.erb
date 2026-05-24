@@ -1,0 +1,68 @@
+<% content_for :title, "テンプレート一覧 | FAX原稿AI" %>
+
+<div class="app-shell">
+  <%= render "shared/sidebar", active: :templates %>
+
+  <main class="main-area">
+    <%= render "shared/topbar" %>
+    <%= render "shared/flash" %>
+
+    <section class="page-heading">
+      <div>
+        <h1>テンプレート一覧</h1>
+        <p>保存した入力内容（サービス・ターゲット・目的などの設定）を、再利用できます。</p>
+      </div>
+      <div class="heading-actions">
+        <%= link_to "＋ 新規テンプレート作成", new_template_path, class: "primary-button" %>
+      </div>
+    </section>
+
+    <%= form_with url: templates_path, method: :get, class: "filter-bar narrow" do |form| %>
+      <%= form.search_field :q, value: params[:q], placeholder: "テンプレート名・サービス名・ターゲットで検索" %>
+      <%= form.submit "検索", class: "secondary-button" %>
+    <% end %>
+
+    <section class="template-list-page">
+      <% @templates.each do |template| %>
+        <article class="template-card">
+          <div>
+            <h2><%= template.title %></h2>
+            <p><%= template.description.presence || "#{template.target}向けに#{template.purpose}を目的とした構成。" %></p>
+            <dl class="template-meta">
+              <div>
+                <dt>サービス</dt>
+                <dd><%= template.service_name %></dd>
+              </div>
+              <div>
+                <dt>ターゲット</dt>
+                <dd><%= template.target %></dd>
+              </div>
+              <div>
+                <dt>目的</dt>
+                <dd><%= template.purpose %></dd>
+              </div>
+              <div>
+                <dt>連絡方法</dt>
+                <dd><%= template.contact_methods %></dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="template-actions">
+            <%= link_to "このテンプレートで作成", new_manuscript_path(template_id: template.id), class: "primary-button" %>
+            <%= link_to "編集", edit_template_path(template), class: "secondary-button" %>
+            <%= button_to "削除", template_path(template), method: :delete, class: "danger-button" %>
+          </div>
+        </article>
+      <% end %>
+
+      <% if @templates.empty? %>
+        <div class="empty-state">
+          <h2>まだテンプレートがありません</h2>
+          <p>原稿作成時に保存するか、新規テンプレートを作成してください。</p>
+          <%= link_to "新規テンプレート作成", new_template_path, class: "primary-button" %>
+        </div>
+      <% end %>
+    </section>
+  </main>
+</div>

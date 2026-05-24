@@ -1,0 +1,35 @@
+<aside class="sidebar" aria-label="メインメニュー">
+  <%= link_to manuscripts_path, class: "brand-link" do %>
+    <span class="brand-icon">▦</span>
+    <span>
+      <strong>FAX原稿<span>AI</span></strong>
+      <small>by NEXLINK</small>
+    </span>
+  <% end %>
+
+  <nav class="side-nav">
+    <%= link_to manuscripts_path, class: ["side-nav-item", nav_active?(active, :manuscripts)] do %>
+      <span>▣</span> 原稿一覧
+    <% end %>
+    <%= link_to new_manuscript_path, class: ["side-nav-item", nav_active?(active, :new_manuscript)] do %>
+      <span>＋</span> 新規作成
+    <% end %>
+    <%= link_to templates_path, class: ["side-nav-item", nav_active?(active, :templates)] do %>
+      <span>▤</span> テンプレート
+    <% end %>
+    <a class="side-nav-item <%= nav_active?(active, :account) %>" href="#">
+      <span>○</span> アカウント
+    </a>
+  </nav>
+
+  <div class="plan-card">
+    <p>ご利用プラン</p>
+    <strong><%= current_company.plan_name %></strong>
+    <p>今月の生成数</p>
+    <strong><%= current_company.monthly_generation_count %> / <%= current_company.monthly_generation_limit %> 件</strong>
+    <div class="usage-bar">
+      <span style="width: <%= [current_company.monthly_generation_count * 100 / current_company.monthly_generation_limit, 100].min %>%"></span>
+    </div>
+    <a href="#">プラン・ご利用状況へ</a>
+  </div>
+</aside>

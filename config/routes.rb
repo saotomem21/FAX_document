@@ -11,5 +11,19 @@ Rails.application.routes.draw do
 
   root "manuscripts#index"
 
-  get "manuscripts" => "manuscripts#index"
+  get "login" => "sessions#new"
+  post "login" => "sessions#create"
+  delete "logout" => "sessions#destroy"
+
+  resources :manuscripts do
+    member do
+      post :generate
+      post :regenerate
+      post :duplicate
+      get :preview_image
+      get :pdf
+    end
+  end
+
+  resources :templates, except: :show
 end
