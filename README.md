@@ -205,6 +205,8 @@ docker compose run --rm web bin/rails db:migrate
 docker compose up
 ```
 
+OpenAI連携を使う場合は、`OPENAI_API_KEY` を環境変数に設定してください。設定がない場合は、ローカルの生成ロジックがフォールバックで動作します。
+
 ブラウザで開くURL:
 
 ```text

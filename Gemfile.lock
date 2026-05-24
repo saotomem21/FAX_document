@@ -78,6 +78,7 @@ GEM
       public_suffix (>= 2.0.2, < 8.0)
     ast (2.4.3)
     base64 (0.3.0)
+    bcrypt (3.1.22)
     bcrypt_pbkdf (1.1.2)
     benchmark (0.5.0)
     bigdecimal (4.1.2)
@@ -158,9 +159,7 @@ GEM
     marcel (1.2.1)
     matrix (0.4.3)
     mini_mime (1.1.5)
-    minitest (6.0.6)
-      drb (~> 2.0)
-      prism (~> 1.5)
+    minitest (5.27.0)
     msgpack (1.8.0)
     mysql2 (0.5.7)
       bigdecimal
@@ -191,6 +190,10 @@ GEM
       racc (~> 1.4)
     nokogiri (1.19.3-x86_64-linux-musl)
       racc (~> 1.4)
+    openai (0.64.0)
+      base64
+      cgi
+      connection_pool
     ostruct (0.6.3)
     parallel (2.1.0)
     parser (3.3.11.1)
@@ -363,6 +366,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  bcrypt (~> 3.1.7)
   bootsnap
   brakeman
   capybara
@@ -370,7 +374,9 @@ DEPENDENCIES
   importmap-rails
   jbuilder
   kamal
+  minitest (~> 5.25)
   mysql2 (~> 0.5)
+  openai
   propshaft
   puma (>= 5.0)
   rails (= 7.2.3)
