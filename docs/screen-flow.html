@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FAX原稿AI 画面遷移図（MVP詳細版）</title>
+  <style>
+    :root {
+      --ink: #111b4f;
+      --muted: #3f4654;
+      --blue: #0d62d0;
+      --blue-dark: #07429d;
+      --green: #179048;
+      --orange: #eb9900;
+      --purple: #6b48c9;
+      --line: #0b1020;
+      --box: #ffffff;
+      --soft-blue: #f2f8ff;
+      --soft-green: #f4fff6;
+      --soft-orange: #fff8ed;
+      --soft-purple: #f7f2ff;
+      --grey: #f3f5f7;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-width: 1600px;
+      background:
+        radial-gradient(circle at 26% 12%, rgba(13, 98, 208, 0.08), transparent 23%),
+        radial-gradient(circle at 78% 38%, rgba(23, 144, 72, 0.08), transparent 22%),
+        #fff;
+      color: var(--ink);
+      font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans CJK JP", Meiryo, sans-serif;
+    }
+
+    .page {
+      width: 1600px;
+      height: 1080px;
+      position: relative;
+      margin: 0 auto;
+      padding: 0 16px 16px;
+      overflow: hidden;
+    }
+
+    header {
+      height: 126px;
+      text-align: center;
+      padding-top: 8px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 46px;
+      line-height: 1.1;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      color: #303746;
+      font-size: 23px;
+      font-weight: 800;
+    }
+
+    .area {
+      position: absolute;
+      border: 1.8px solid;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.66);
+    }
+
+    .area.login {
+      left: 16px;
+      top: 132px;
+      width: 520px;
+      height: 300px;
+      border-color: var(--blue);
+      background: rgba(242, 248, 255, 0.78);
+    }
+
+    .area.main {
+      left: 554px;
+      top: 132px;
+      width: 1032px;
+      height: 662px;
+      border-color: var(--green);
+      background: rgba(244, 255, 246, 0.72);
+    }
+
+    .area.template {
+      left: 196px;
+      top: 456px;
+      width: 454px;
+      height: 336px;
+      border-color: #64b96a;
+      background: rgba(244, 255, 246, 0.72);
+    }
+
+    .area.modal {
+      left: 196px;
+      top: 812px;
+      width: 1174px;
+      height: 138px;
+      border-color: var(--orange);
+      background: rgba(255, 248, 237, 0.78);
+    }
+
+    .area.process {
+      left: 52px;
+      top: 970px;
+      width: 1306px;
+      height: 100px;
+      border-color: #9a78e7;
+      background: rgba(247, 242, 255, 0.7);
+    }
+
+    .badge {
+      position: absolute;
+      z-index: 3;
+      height: 36px;
+      padding: 3px 18px 0;
+      border-radius: 18px;
+      color: white;
+      font-weight: 900;
+      font-size: 24px;
+      line-height: 32px;
+      white-space: nowrap;
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+    }
+
+    .badge.blue { background: linear-gradient(90deg, #0d62d0, #074aa9); left: 24px; top: 112px; }
+    .badge.green { background: linear-gradient(90deg, #188d46, #117b3b); left: 580px; top: 112px; }
+    .badge.orange { background: linear-gradient(90deg, #f2a000, #d88000); left: 24px; top: 880px; }
+    .badge.purple { background: linear-gradient(90deg, #6b48c9, #4a33a5); left: 70px; top: 992px; }
+
+    .node {
+      position: absolute;
+      z-index: 2;
+      background: var(--box);
+      border: 3px solid var(--blue);
+      border-radius: 7px;
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+      padding: 12px 12px 10px;
+      color: var(--ink);
+    }
+
+    .node.grey {
+      border-color: #89909a;
+      background: linear-gradient(#fff, var(--grey));
+    }
+
+    .node.purple {
+      border-color: #5a35bf;
+    }
+
+    .node.small {
+      padding: 9px 10px 8px;
+    }
+
+    .node h2 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.25;
+      text-align: center;
+      font-weight: 900;
+    }
+
+    .node h2 .path {
+      display: block;
+      margin-top: 2px;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .node .rule {
+      margin: 8px -4px 8px;
+      border-top: 1.5px dashed #5f6673;
+    }
+
+    .node ul {
+      margin: 0;
+      padding-left: 17px;
+      color: #111827;
+      font-size: 13px;
+      line-height: 1.55;
+      font-weight: 700;
+    }
+
+    .node .single {
+      margin: 0;
+      text-align: center;
+      color: #111827;
+      font-size: 13px;
+      line-height: 1.55;
+      font-weight: 800;
+    }
+
+    .caption {
+      position: absolute;
+      z-index: 2;
+      color: #111827;
+      font-size: 13px;
+      line-height: 1.3;
+      font-weight: 900;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.78);
+      padding: 0 4px;
+    }
+
+    .path-label {
+      position: absolute;
+      z-index: 2;
+      color: #111827;
+      font-size: 13px;
+      font-weight: 900;
+      background: rgba(255, 255, 255, 0.86);
+      padding: 0 4px;
+      white-space: nowrap;
+    }
+
+    .arrows {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .arrows line,
+    .arrows path {
+      stroke: var(--line);
+      stroke-width: 2.2;
+      fill: none;
+    }
+
+    .arrows .dash {
+      stroke-dasharray: 6 6;
+    }
+
+    .legend {
+      position: absolute;
+      right: 14px;
+      bottom: 30px;
+      width: 190px;
+      height: 244px;
+      z-index: 2;
+      border: 1.6px solid #8c8f96;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 12px 14px;
+      color: #111827;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .legend h3 {
+      margin: 0 0 10px;
+      text-align: center;
+      color: #111827;
+      font-size: 16px;
+    }
+
+    .legend-row {
+      display: grid;
+      grid-template-columns: 58px 1fr;
+      gap: 9px;
+      align-items: center;
+      margin: 10px 0;
+    }
+
+    .legend-line {
+      height: 0;
+      border-top: 2.2px solid #111827;
+      position: relative;
+    }
+
+    .legend-line::after {
+      content: "";
+      position: absolute;
+      right: -1px;
+      top: -6px;
+      border-left: 10px solid #111827;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+    }
+
+    .legend-line.dashed {
+      border-top-style: dashed;
+    }
+
+    .legend-box {
+      width: 50px;
+      height: 32px;
+      border: 3px solid var(--blue);
+      border-radius: 5px;
+    }
+
+    .legend-box.grey {
+      border-color: #8c8f96;
+      background: var(--grey);
+    }
+
+    .process-step {
+      position: absolute;
+      z-index: 2;
+      top: 992px;
+      height: 58px;
+      border: 3px solid #5a35bf;
+      border-radius: 7px;
+      background: #fff;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1.25;
+      padding: 0 12px;
+    }
+
+    @media print {
+      body {
+        min-width: 0;
+        background: #fff;
+      }
+
+      .page {
+        margin: 0;
+        transform: scale(0.71);
+        transform-origin: top left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page" aria-label="FAX原稿AI 画面遷移図 MVP詳細版">
+    <header>
+      <h1>FAX原稿AI 画面遷移図（MVP詳細版）</h1>
+      <div class="subtitle">対象：NEXLINK利用企業の担当者 / 出力：PDF / テンプレート＝フォーム入力内容の保存</div>
+    </header>
+
+    <section class="area login" aria-hidden="true"></section>
+    <section class="area main" aria-hidden="true"></section>
+    <section class="area template" aria-hidden="true"></section>
+    <section class="area modal" aria-hidden="true"></section>
+    <section class="area process" aria-hidden="true"></section>
+
+    <div class="badge blue">1. 未ログイン領域</div>
+    <div class="badge green">2. ログイン後領域</div>
+    <div class="badge orange">3. モーダル・補助導線</div>
+    <div class="badge purple">4. 主な処理フロー</div>
+
+    <svg class="arrows" viewBox="0 0 1600 1080" aria-hidden="true">
+      <defs>
+        <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+          <path d="M0,0 L10,4 L0,8 Z" fill="#0b1020"></path>
+        </marker>
+      </defs>
+
+      <line x1="175" y1="260" x2="252" y2="260" marker-end="url(#arrow)"></line>
+      <line x1="380" y1="260" x2="432" y2="260" marker-end="url(#arrow)"></line>
+      <path d="M95 360 L95 410 L526 410 L526 332 L555 332" marker-end="url(#arrow)"></path>
+      <path d="M434 410 L170 410 L170 360" marker-end="url(#arrow)"></path>
+
+      <line x1="732" y1="272" x2="790" y2="272" marker-end="url(#arrow)"></line>
+      <line x1="952" y1="238" x2="994" y2="238" marker-end="url(#arrow)"></line>
+      <line x1="1154" y1="238" x2="1196" y2="238" marker-end="url(#arrow)"></line>
+      <line x1="1358" y1="238" x2="1398" y2="238" marker-end="url(#arrow)"></line>
+      <line x1="994" y1="300" x2="952" y2="300" marker-end="url(#arrow)"></line>
+      <line x1="1196" y1="300" x2="1154" y2="300" marker-end="url(#arrow)"></line>
+      <line x1="1398" y1="300" x2="1358" y2="300" marker-end="url(#arrow)"></line>
+      <path d="M1488 386 L1488 438" marker-end="url(#arrow)"></path>
+      <line x1="1388" y1="522" x2="1338" y2="522" marker-end="url(#arrow)"></line>
+      <line x1="1210" y1="492" x2="1142" y2="492" marker-end="url(#arrow)"></line>
+      <line x1="1142" y1="545" x2="1210" y2="545" marker-end="url(#arrow)"></line>
+      <line x1="984" y1="522" x2="924" y2="522" marker-end="url(#arrow)"></line>
+
+      <path d="M632 386 L632 478 L426 478" marker-end="url(#arrow)"></path>
+      <path d="M706 386 L706 515 L650 515" class="dash" marker-end="url(#arrow)"></path>
+      <path d="M632 792 L632 386" class="dash" marker-end="url(#arrow)"></path>
+      <path d="M860 812 L860 390" class="dash" marker-end="url(#arrow)"></path>
+      <path d="M1042 812 L1042 640" class="dash" marker-end="url(#arrow)"></path>
+      <path d="M1260 812 L1260 640" class="dash" marker-end="url(#arrow)"></path>
+      <path d="M1468 812 L1468 552" class="dash" marker-end="url(#arrow)"></path>
+
+      <path d="M126 728 L126 770" marker-end="url(#arrow)"></path>
+      <path d="M110 540 L110 600" marker-end="url(#arrow)"></path>
+      <line x1="184" y1="538" x2="288" y2="538" marker-end="url(#arrow)"></line>
+      <line x1="462" y1="538" x2="518" y2="538" marker-end="url(#arrow)"></line>
+      <path d="M362 644 L362 710 L404 710" marker-end="url(#arrow)"></path>
+      <path d="M532 710 L832 710" marker-end="url(#arrow)"></path>
+      <path d="M404 792 L404 810" class="dash" marker-end="url(#arrow)"></path>
+      <path d="M520 792 L520 810" class="dash" marker-end="url(#arrow)"></path>
+
+      <path d="M369 792 L369 812" class="dash" marker-end="url(#arrow)"></path>
+      <path d="M586 640 L586 812" class="dash" marker-end="url(#arrow)"></path>
+      <path d="M860 792 L860 812" class="dash" marker-end="url(#arrow)"></path>
+
+      <line x1="350" y1="1022" x2="390" y2="1022" marker-end="url(#arrow)"></line>
+      <line x1="520" y1="1022" x2="570" y2="1022" marker-end="url(#arrow)"></line>
+      <line x1="718" y1="1022" x2="758" y2="1022" marker-end="url(#arrow)"></line>
+      <line x1="882" y1="1022" x2="922" y2="1022" marker-end="url(#arrow)"></line>
+      <line x1="1010" y1="1022" x2="1050" y2="1022" marker-end="url(#arrow)"></line>
+      <line x1="1148" y1="1022" x2="1188" y2="1022" marker-end="url(#arrow)"></line>
+    </svg>
+
+    <article class="node" style="left:34px; top:216px; width:142px; height:144px;">
+      <h2>ログイン画面</h2>
+      <div class="rule"></div>
+      <ul>
+        <li>メールアドレス</li>
+        <li>パスワード</li>
+        <li>ログイン</li>
+      </ul>
+    </article>
+
+    <article class="node" style="left:260px; top:216px; width:128px; height:144px;">
+      <h2>パスワード再設定<br>依頼画面</h2>
+      <div class="rule"></div>
+      <ul>
+        <li>メールアドレス入力</li>
+      </ul>
+    </article>
+
+    <article class="node" style="left:434px; top:216px; width:100px; height:144px;">
+      <h2>パスワード再設定<br>完了画面</h2>
+    </article>
+
+    <div class="caption" style="left:178px; top:244px;">パスワードを<br>忘れた場合</div>
+    <div class="caption" style="left:394px; top:257px;">送信</div>
+    <div class="caption" style="left:120px; top:378px;">認証成功</div>
+    <div class="caption" style="left:365px; top:388px;">ログインへ戻る</div>
+
+    <article class="node" style="left:584px; top:166px; width:154px; height:222px;">
+      <h2>原稿一覧画面<span class="path">/manuscripts</span></h2>
+      <div class="rule"></div>
+      <ul>
+        <li>自分の原稿のみ表示</li>
+        <li>検索</li>
+        <li>絞り込み</li>
+        <li>詳細</li>
+        <li>複製</li>
+        <li>削除</li>
+        <li>新規作成</li>
+      </ul>
+    </article>
+
+    <article class="node" style="left:790px; top:166px; width:160px; height:222px;">
+      <h2>新規作成 Step1<br>基本情報<span class="path">/manuscripts/new/step1</span></h2>
+      <div class="rule"></div>
+      <ul>
+        <li>原稿タイトル</li>
+        <li>会社名</li>
+        <li>サービス名</li>
+        <li>サービス概要</li>
+        <li>対象地域</li>
+      </ul>
+    </article>
+
+    <article class="node" style="left:1000px; top:166px; width:154px; height:222px;">
+      <h2>新規作成 Step2<br>訴求設計<span class="path">/manuscripts/new/step2</span></h2>
+      <div class="rule"></div>
+      <ul>
+        <li>ターゲット</li>
+        <li>目的</li>
+        <li>問い合わせ導線</li>
+        <li>キャッチコピー</li>
+        <li>強み</li>
+      </ul>
+    </article>
+
+    <article class="node" style="left:1202px; top:166px; width:158px; height:222px;">
+      <h2>新規作成 Step3<br>掲載情報<span class="path">/manuscripts/new/step3</span></h2>
+      <div class="rule"></div>
+      <ul>
+        <li>電話番号</li>
+        <li>FAX番号</li>
+        <li>メールアドレス（任意）</li>
+        <li>URL</li>
+        <li>受付時間</li>
+        <li>信頼情報</li>
+      </ul>
+    </article>
+
+    <article class="node" style="left:1408px; top:166px; width:150px; height:222px;">
+      <h2>新規作成 Step4<br>確認<span class="path">/manuscripts/new/confirm</span></h2>
+      <div class="rule"></div>
+      <ul>
+        <li>入力内容確認</li>
+        <li>テンプレート保存</li>
+        <li>生成開始</li>
+      </ul>
+    </article>
+
+    <div class="path-label" style="left:742px; top:258px;">新規作成</div>
+    <div class="path-label" style="left:960px; top:214px;">次へ</div>
+    <div class="path-label" style="left:1162px; top:214px;">次へ</div>
+    <div class="path-label" style="left:1368px; top:214px;">次へ</div>
+    <div class="path-label" style="left:962px; top:304px;">戻る</div>
+    <div class="path-label" style="left:1164px; top:304px;">戻る</div>
+    <div class="path-label" style="left:1368px; top:304px;">戻る</div>
+    <div class="path-label" style="left:1480px; top:402px;">生成する</div>
+
+    <article class="node" style="left:1410px; top:442px; width:150px; height:158px;">
+      <h2>生成中画面<span class="path">/manuscripts/generating</span></h2>
+      <div class="rule"></div>
+      <ul>
+        <li>AI構成生成</li>
+        <li>画像生成</li>
+        <li>PDF化</li>
+      </ul>
+    </article>
+
+    <article class="node" style="left:1190px; top:492px; width:146px; height:108px;">
+      <h2>原稿再生成中画面<span class="path">/manuscripts/:id/regenerating</span></h2>
+      <div class="rule"></div>
+      <ul>
+        <li>編集指示を<br>反映して再生成</li>
+      </ul>
+    </article>
+
+    <article class="node" style="left:988px; top:440px; width:154px; height:196px;">
+      <h2>原稿詳細画面<span class="path">/manuscripts/:id</span></h2>
+      <div class="rule"></div>
+      <ul>
+        <li>プレビュー</li>
+        <li>PDFダウンロード</li>
+        <li>編集指示</li>
+        <li>再生成</li>
+        <li>複製</li>
+        <li>削除</li>
+        <li>バージョン履歴</li>
+      </ul>
+    </article>
+
+    <div class="path-label" style="left:1150px; top:462px;">再生成</div>
+    <div class="path-label" style="left:1150px; top:562px;">再生成<br>完了</div>
+    <div class="path-label" style="left:1340px; top:560px;">生成完了</div>
+    <div class="path-label" style="left:910px; top:500px;">一覧へ戻る</div>
+
+    <article class="node" style="left:30px; top:600px; width:154px; height:128px;">
+      <h2>アカウント画面<span class="path">/account</span></h2>
+      <div class="rule"></div>
+      <ul>
+        <li>ユーザー名</li>
+        <li>ログイン用メールアドレス</li>
+        <li>所属会社</li>
+      </ul>
+    </article>
+
+    <article class="node small" style="left:30px; top:774px; width:154px; height:56px;">
+      <h2>ログイン画面<br><span style="font-size:13px; color:#111827;">（未ログイン領域へ）</span></h2>
+    </article>
+
+    <div class="path-label" style="left:86px; top:490px;">サイドメニュー<br>（アカウント）</div>
+    <div class="path-label" style="left:94px; top:742px;">ログアウト</div>
+
+    <article class="node" style="left:288px; top:520px; width:174px; height:150px;">
+      <h2>テンプレート一覧画面<span class="path">/templates</span></h2>
+      <div class="rule"></div>
+      <ul>
+        <li>テンプレート名</li>
+        <li>このテンプレートで作成</li>
+        <li>編集</li>
+        <li>削除</li>
+      </ul>
+    </article>
+
+    <article class="node" style="left:518px; top:520px; width:190px; height:132px;">
+      <h2>テンプレート編集画面<span class="path">/templates/:id/edit</span></h2>
+      <div class="rule"></div>
+      <ul>
+        <li>フォーム入力内容を編集</li>
+        <li>テンプレートタイトル</li>
+        <li>未入力時は<br>YYYY/MM/DD/hh/mm/ss</li>
+      </ul>
+    </article>
+
+    <article class="node small" style="left:404px; top:674px; width:128px; height:116px;">
+      <h2>テンプレートから<br>新規作成 Step1<span class="path">/templates/:id/use</span></h2>
+      <div class="rule"></div>
+      <ul>
+        <li>保存済み内容を初期値として読み込み</li>
+      </ul>
+    </article>
+
+    <article class="node small" style="left:832px; top:674px; width:128px; height:106px;">
+      <h2>新規作成 Step2<br>訴求設計<br><span style="font-size:13px; color:#111827;">（上記と同一）</span></h2>
+    </article>
+
+    <div class="path-label" style="left:486px; top:548px;">編集</div>
+    <div class="path-label" style="left:380px; top:702px;">この<br>テンプレートで作成</div>
+    <div class="path-label" style="left:620px; top:706px;">内容確認後に継続</div>
+    <div class="path-label" style="left:486px; top:464px;">サイドメニュー<br>（テンプレート）</div>
+
+    <article class="node grey" style="left:234px; top:852px; width:208px; height:86px;">
+      <h2>削除確認モーダル</h2>
+      <div class="rule"></div>
+      <ul>
+        <li>原稿削除 / テンプレート削除</li>
+      </ul>
+    </article>
+
+    <article class="node grey" style="left:478px; top:852px; width:208px; height:86px;">
+      <h2>テンプレート保存モーダル</h2>
+      <div class="rule"></div>
+      <ul>
+        <li>テンプレートタイトル（任意）</li>
+        <li>未入力時は日時を自動設定</li>
+      </ul>
+    </article>
+
+    <article class="node grey" style="left:728px; top:852px; width:176px; height:86px;">
+      <h2>原稿複製処理</h2>
+      <div class="rule"></div>
+      <ul>
+        <li>原稿一覧から複製</li>
+      </ul>
+    </article>
+
+    <article class="node grey" style="left:926px; top:852px; width:208px; height:86px;">
+      <h2>PDFダウンロード</h2>
+      <div class="rule"></div>
+      <ul>
+        <li>原稿詳細から実行</li>
+      </ul>
+    </article>
+
+    <article class="node grey" style="left:1156px; top:852px; width:190px; height:86px;">
+      <h2>エラー表示</h2>
+      <div class="rule"></div>
+      <ul>
+        <li>生成失敗 / 入力不備 / APIエラー</li>
+      </ul>
+    </article>
+
+    <div class="process-step" style="left:262px; width:116px;">フォーム入力</div>
+    <div class="process-step" style="left:410px; width:132px;">AIがFAXDM<br>構成案生成</div>
+    <div class="process-step" style="left:570px; width:150px;">画像生成<br>プロンプト生成</div>
+    <div class="process-step" style="left:758px; width:126px;">FAX原稿<br>画像生成</div>
+    <div class="process-step" style="left:922px; width:88px;">PDF化</div>
+    <div class="process-step" style="left:1050px; width:100px;">原稿保存</div>
+    <div class="process-step" style="left:1190px; width:126px;">一覧・詳細で確認</div>
+
+    <aside class="legend" aria-label="凡例">
+      <h3>凡例</h3>
+      <div class="legend-row">
+        <div class="legend-line"></div>
+        <div>実線矢印<br>＝画面遷移</div>
+      </div>
+      <div class="legend-row">
+        <div class="legend-line dashed"></div>
+        <div>破線矢印<br>＝モーダル / 補助処理</div>
+      </div>
+      <div class="legend-row">
+        <div class="legend-box"></div>
+        <div>青枠のボックス<br>＝主要画面</div>
+      </div>
+      <div class="legend-row">
+        <div class="legend-box grey"></div>
+        <div>薄グレー枠のボックス<br>＝補助画面</div>
+      </div>
+    </aside>
+  </main>
+</body>
+</html>
