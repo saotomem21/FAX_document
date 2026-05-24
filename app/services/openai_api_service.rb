@@ -3,7 +3,7 @@ class OpenaiApiService
   class InvalidResponseError < StandardError; end
 
   def initialize(client: nil)
-    @client = client || OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"])
+    @client = client || OpenAI::Client.new(api_key: ENV["OPENAI_API_KEY"])
   end
 
   def generate_manuscript_content(manuscript, edit_instruction: nil)
