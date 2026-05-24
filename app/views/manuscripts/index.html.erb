@@ -87,30 +87,30 @@
 
         <div class="manuscript-table">
           <div class="table-row table-head">
-            <span>原稿</span>
-            <span>ターゲット</span>
-            <span>状態</span>
-            <span>更新日時</span>
-            <span></span>
+            <span class="title-cell">原稿</span>
+            <span class="target-cell">ターゲット</span>
+            <span class="status-cell">状態</span>
+            <span class="updated-cell">更新日時</span>
+            <span class="actions-cell"></span>
           </div>
 
           <% @manuscripts.each do |manuscript| %>
             <article class="table-row manuscript-row">
-              <div class="manuscript-title-cell">
+              <div class="manuscript-title-cell title-cell">
                 <span class="thumb" aria-hidden="true"></span>
                 <div>
                   <h3><%= manuscript[:title] %></h3>
                   <p><%= manuscript[:service] %></p>
                 </div>
               </div>
-              <span><%= manuscript[:target] %></span>
-              <span>
+              <span class="target-cell"><%= manuscript[:target] %></span>
+              <span class="status-cell">
                 <mark class="status-badge <%= manuscript[:status] == "生成済み" ? "done" : manuscript[:status] == "下書き" ? "draft" : "waiting" %>">
                   <%= manuscript[:status] %>
                 </mark>
               </span>
-              <span><%= manuscript[:updated_at] %></span>
-              <div class="row-actions">
+              <span class="updated-cell"><%= manuscript[:updated_at] %></span>
+              <div class="row-actions actions-cell">
                 <button type="button" aria-label="詳細">詳細</button>
                 <button type="button" aria-label="複製">複製</button>
               </div>

@@ -715,6 +715,17 @@ h3 {
   font-weight: 800;
 }
 
+@media (max-width: 1340px) {
+  .content-grid,
+  .creation-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-panel {
+    align-self: start;
+  }
+}
+
 @media (max-width: 1180px) {
   body {
     min-width: 0;
@@ -758,8 +769,8 @@ h3 {
     grid-template-columns: minmax(240px, 1fr) 130px 110px;
   }
 
-  .table-row > span:nth-of-type(2),
-  .table-row > span:nth-of-type(3) {
+  .target-cell,
+  .updated-cell {
     display: none;
   }
 
@@ -795,6 +806,7 @@ h3 {
 
   .manuscript-table {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .table-row {
@@ -803,5 +815,13 @@ h3 {
 
   .fax-preview {
     width: calc(100% - 40px);
+  }
+
+  .preview-actions {
+    flex-wrap: wrap;
+  }
+
+  .preview-actions button {
+    flex: 1 1 96px;
   }
 }
