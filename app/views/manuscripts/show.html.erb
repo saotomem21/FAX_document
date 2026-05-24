@@ -36,6 +36,13 @@
 
       <aside class="detail-side">
         <section class="info-card">
+          <h2>生成された本文</h2>
+          <div class="generated-body-text">
+            <%= simple_format(@manuscript.generated_body) %>
+          </div>
+        </section>
+
+        <section class="info-card">
           <h2>原稿情報</h2>
           <dl class="info-list">
             <dt>サービス名</dt>

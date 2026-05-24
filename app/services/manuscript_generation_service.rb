@@ -128,45 +128,44 @@ class ManuscriptGenerationService
   end
 
   def svg_markup
-    lines = wrap(headline, 13)
-    summary_lines = wrap(@manuscript.service_summary, 13)
-    urgency_lines = wrap(@manuscript.urgency_reason.presence || "#{@manuscript.target}向けに、#{@manuscript.purpose}を促進するFAXDMです。", 32)
+    title_lines = wrap(headline, 13)
+    body_lines = wrap_text_for_svg(generated_body, 28)
+    body_y_start = 318
+    body_font_size = 16
+    body_line_height = 28
+    max_body_lines = 14
+    body_lines = body_lines.first(max_body_lines)
+
+    # Calculate where contact section starts based on body length
+    contact_y = body_y_start + (body_lines.length * body_line_height) + 40
+    contact_y = 748 if contact_y < 748 # minimum position
 
     <<~SVG
       <svg xmlns="http://www.w3.org/2000/svg" width="794" height="1123" viewBox="0 0 794 1123">
         <rect width="794" height="1123" fill="#ffffff"/>
         <rect x="36" y="34" width="722" height="1055" fill="#ffffff" stroke="#111111" stroke-width="2"/>
-        #{text_block(lines, 397, 92, 34, 42, "middle", 900)}
+        #{text_block(title_lines, 397, 92, 34, 42, "middle", 900)}
         <text x="397" y="210" text-anchor="middle" font-family="sans-serif" font-size="24" font-weight="900">#{h(@manuscript.service_name)}</text>
         <rect x="76" y="242" width="642" height="42" rx="5" fill="#111111"/>
-        <text x="397" y="271" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="900" fill="#ffffff">#{h(@manuscript.purpose)}を目的としたご案内です</text>
+        <text x="397" y="271" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="900" fill="#ffffff">#{h(@manuscript.target)}向け #{h(@manuscript.purpose)}のご案内</text>
 
-        <rect x="70" y="318" width="305" height="158" fill="#ffffff" stroke="#111111" stroke-width="2"/>
-        <rect x="70" y="318" width="305" height="42" fill="#111111"/>
-        <text x="88" y="346" font-family="sans-serif" font-size="18" font-weight="900" fill="#ffffff">こんなお悩みはありませんか？</text>
-        #{check_lines(concerns, 92, 391)}
+        <rect x="70" y="#{body_y_start}" width="654" height="#{body_lines.length * body_line_height + 24}" fill="#ffffff" stroke="#111111" stroke-width="2"/>
+        #{text_block(body_lines, 92, body_y_start + body_font_size + 10, body_font_size, body_line_height, "start", 600)}
 
-        <rect x="415" y="316" width="280" height="160" fill="#f7f7f7" stroke="#111111" stroke-width="2"/>
-        #{text_block(summary_lines.first(5), 555, 354, 15, 23, "middle", 800)}
+        <rect x="70" y="#{contact_y}" width="654" height="60" rx="6" fill="#111111"/>
+        <text x="397" y="#{contact_y + 38}" text-anchor="middle" font-family="sans-serif" font-size="24" font-weight="900" fill="#ffffff">ご相談・お問い合わせはお気軽にどうぞ！</text>
 
-        <line x1="105" y1="522" x2="689" y2="522" stroke="#111111" stroke-width="3"/>
-        <text x="397" y="515" text-anchor="middle" font-family="sans-serif" font-size="21" font-weight="900">私たちが選ばれる理由</text>
-        #{benefit_boxes}
+        <rect x="70" y="#{contact_y + 80}" width="654" height="96" fill="#ffffff" stroke="#111111" stroke-width="2"/>
+        <circle cx="124" cy="#{contact_y + 128}" r="30" fill="#111111"/>
+        <text x="124" y="#{contact_y + 139}" text-anchor="middle" font-family="sans-serif" font-size="34" font-weight="900" fill="#ffffff">☎</text>
+        <text x="178" y="#{contact_y + 137}" font-family="sans-serif" font-size="40" font-weight="900">#{h(@manuscript.phone_number.presence || "03-XXXX-XXXX")}</text>
+        <text x="178" y="#{contact_y + 165}" font-family="sans-serif" font-size="15" font-weight="800">受付時間 #{h(@manuscript.reception_hours.presence || "平日 9:00〜18:00")}</text>
 
-        <rect x="70" y="748" width="654" height="60" rx="6" fill="#111111"/>
-        <text x="397" y="786" text-anchor="middle" font-family="sans-serif" font-size="24" font-weight="900" fill="#ffffff">ご相談・お問い合わせはお気軽にどうぞ！</text>
-
-        <rect x="70" y="828" width="654" height="96" fill="#ffffff" stroke="#111111" stroke-width="2"/>
-        <circle cx="124" cy="876" r="30" fill="#111111"/>
-        <text x="124" y="887" text-anchor="middle" font-family="sans-serif" font-size="34" font-weight="900" fill="#ffffff">☎</text>
-        <text x="178" y="885" font-family="sans-serif" font-size="40" font-weight="900">#{h(@manuscript.phone_number.presence || "03-XXXX-XXXX")}</text>
-        <text x="178" y="913" font-family="sans-serif" font-size="15" font-weight="800">受付時間 #{h(@manuscript.reception_hours.presence || "平日 9:00〜18:00")}</text>
-
-        <rect x="70" y="946" width="654" height="70" fill="#ffffff" stroke="#111111" stroke-width="2"/>
-        <text x="92" y="990" font-family="sans-serif" font-size="18" font-weight="900">FAX</text>
-        <text x="140" y="990" font-family="sans-serif" font-size="21" font-weight="900">#{h(@manuscript.fax_number.presence || "03-XXXX-XXXX")}</text>
-        <text x="410" y="990" font-family="sans-serif" font-size="18" font-weight="900">WEB</text>
-        <text x="468" y="990" font-family="sans-serif" font-size="18" font-weight="900">#{h(@manuscript.website_url.presence || "https://example.jp")}</text>
+        <rect x="70" y="#{contact_y + 198}" width="654" height="70" fill="#ffffff" stroke="#111111" stroke-width="2"/>
+        <text x="92" y="#{contact_y + 242}" font-family="sans-serif" font-size="18" font-weight="900">FAX</text>
+        <text x="140" y="#{contact_y + 242}" font-family="sans-serif" font-size="21" font-weight="900">#{h(@manuscript.fax_number.presence || "03-XXXX-XXXX")}</text>
+        <text x="410" y="#{contact_y + 242}" font-family="sans-serif" font-size="18" font-weight="900">WEB</text>
+        <text x="468" y="#{contact_y + 242}" font-family="sans-serif" font-size="18" font-weight="900">#{h(@manuscript.website_url.presence || "https://example.jp")}</text>
 
         <rect x="70" y="1038" width="654" height="36" fill="#f3f3f3" stroke="#111111" stroke-width="1"/>
         <text x="92" y="1063" font-family="sans-serif" font-size="16" font-weight="900">#{h(@manuscript.display_company_name)}</text>
@@ -208,6 +207,16 @@ class ManuscriptGenerationService
 
   def wrap(text, width)
     text.to_s.scan(/.{1,#{width}}/m).first(6)
+  end
+
+  def wrap_text_for_svg(text, width)
+    lines = []
+    text.to_s.split(/\n/).each do |paragraph|
+      paragraph = paragraph.strip
+      next if paragraph.empty?
+      lines.concat(paragraph.scan(/.{1,#{width}}/m))
+    end
+    lines
   end
 
   def shorten(text, width)

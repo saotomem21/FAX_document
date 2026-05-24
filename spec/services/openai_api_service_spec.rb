@@ -14,7 +14,7 @@ RSpec.describe OpenaiApiService, type: :model do
     it "initializes the OpenAI client with the API key from environment" do
       client = instance_double(OpenAI::Client)
       allow(OpenAI::Client).to receive(:new).with(api_key: "test-key").and_return(client)
-      allow(client).to receive(:chat).and_return(double(completions: { "choices" => [] }))
+      allow(client).to receive_message_chain(:chat, :completions, :create).and_return(double(deep_to_h: { "choices" => [] }))
 
       service = OpenaiApiService.new
       expect(service.instance_variable_get(:@client)).to eq(client)
@@ -30,7 +30,7 @@ RSpec.describe OpenaiApiService, type: :model do
     end
 
     it "parses generated_body and image_prompt from the OpenAI response" do
-      response = {
+      response_hash = {
         "choices" => [
           {
             "message" => {
@@ -40,10 +40,10 @@ RSpec.describe OpenaiApiService, type: :model do
         ]
       }
 
-      chat_double = double('chat', completions: response)
+      response = double('response', deep_to_h: response_hash)
 
       client = instance_double(OpenAI::Client)
-      allow(client).to receive(:chat).and_return(chat_double)
+      allow(client).to receive_message_chain(:chat, :completions, :create).and_return(response)
       allow(OpenAI::Client).to receive(:new).with(api_key: "test-key").and_return(client)
 
       manuscript = OpenStruct.new(

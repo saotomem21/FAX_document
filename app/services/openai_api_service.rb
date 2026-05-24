@@ -9,25 +9,45 @@ class OpenaiApiService
   def generate_manuscript_content(manuscript, edit_instruction: nil)
     raise ApiKeyMissingError, "OPENAI_API_KEY is not configured" if ENV["OPENAI_API_KEY"].blank?
 
-    response = @client.chat.completions(
-      parameters: {
-        model: "gpt-4o-mini",
-        temperature: 0.7,
-        max_tokens: 600,
-        messages: [
-          {
-            role: "system",
-            content: "あなたは日本語のFAXDM原稿を作成するアシスタントです。入力されたサービス情報から、FAX原稿の本文と画像生成プロンプトを生成してください。"
-          },
-          {
-            role: "user",
-            content: openai_user_prompt(manuscript, edit_instruction)
-          }
-        ]
-      }
-    )
+    params = {
+      model: "gpt-4o-mini",
+      temperature: 0.7,
+      max_tokens: 600,
+      messages: [
+        {
+          role: "system",
+          content: "あなたは日本語のFAXDM原稿を作成するアシスタントです。入力されたサービス情報から、FAX原稿の本文と画像生成プロンプトを生成してください。"
+        },
+        {
+          role: "user",
+          content: openai_user_prompt(manuscript, edit_instruction)
+        }
+      ]
+    }
 
-    content = response.dig("choices", 0, "message", "content")
+    response = @client.chat.completions.create(params)
+
+    # Normalize response to a Hash-like structure and extract content robustly
+    raw = if response.nil?
+      nil
+    elsif response.respond_to?(:deep_to_h)
+      begin
+        response.deep_to_h
+      rescue StandardError
+        nil
+      end
+    else
+      response
+    end
+
+    unless raw.is_a?(Hash)
+      raise InvalidResponseError, "OpenAI client returned unexpected response: #{response.inspect}"
+    end
+
+    content = raw.dig("choices", 0, "message", "content") ||
+              raw.dig(:choices, 0, :message, :content) ||
+              raw["choices"]&.first&.dig("message", "content") ||
+              raw[:choices]&.first&.dig(:message, :content)
     parsed = parse_response(content)
 
     unless parsed.is_a?(Hash) && parsed["generated_body"].present? && parsed["image_prompt"].present?
