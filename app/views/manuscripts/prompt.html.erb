@@ -65,7 +65,7 @@
             <dt>対応エリア</dt>
             <dd><%= @manuscript.target_region.presence || (presentation_mode? ? "東京都・神奈川県・埼玉県" : "〇〇エリア") %></dd>
             <dt>担当部署</dt>
-            <dd><%= @manuscript.department.presence || "営業部" %></dd>
+            <dd><%= @manuscript.try(:department).presence || "営業部" %></dd>
           </dl>
         </section>
       </aside>

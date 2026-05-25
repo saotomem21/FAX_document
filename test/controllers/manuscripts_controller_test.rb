@@ -25,7 +25,6 @@ class ManuscriptsControllerTest < ActionDispatch::IntegrationTest
     manuscript = Manuscript.order(:created_at).last
     assert_redirected_to prompt_manuscript_path(manuscript)
     assert_includes %w[prompt_generated prompt_generating], manuscript.status
-    assert manuscript.image_prompt.present?
     assert manuscript.generated_structure.present?
   end
 

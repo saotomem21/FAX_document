@@ -323,7 +323,7 @@ module Pdf
       address = @manuscript.address.presence || "〒100-0001 東京都○○区○○ 1-2-3"
       hours = @manuscript.reception_hours.presence || "平日 9:00〜18:00"
       region = @manuscript.target_region.presence || "東京都・神奈川県・埼玉県"
-      dept = @manuscript.department.presence || "営業部"
+      dept = @manuscript.try(:department).presence || "営業部"
 
       doc.stroke_color "555555"
       doc.line_width 1
