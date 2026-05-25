@@ -11,7 +11,10 @@
       <div>
         <p class="breadcrumb"><%= link_to "原稿一覧", manuscripts_path %> ＞ 原稿詳細</p>
         <h1>原稿詳細</h1>
-        <p>生成した原稿の詳細と編集・再生成ができます。</p>
+        <p>生成したFAX原稿PDFを確認・ダウンロードできます。</p>
+        <% if presentation_mode? %>
+          <span class="mode-badge presentation">📽️ プレゼンテーションモード</span>
+        <% end %>
       </div>
       <div class="heading-actions">
         <%= link_to "原稿一覧に戻る", manuscripts_path, class: "secondary-button" %>
@@ -23,25 +26,26 @@
 
     <div class="detail-layout">
       <section class="preview-card">
-        <h2>原稿プレビュー <small>（A4・モノクロ・FAX送信用）</small></h2>
-        <% if @manuscript.generated? %>
-          <%= image_tag preview_image_manuscript_path(@manuscript), class: "fax-image", alt: "生成されたFAX原稿プレビュー" %>
+        <h2>FAX原稿プレビュー <small>（A4・モノクロ・FAX送信用）</small></h2>
+        <% if @manuscript.generated? && @manuscript.generated_pdf_path.present? %>
+          <iframe src="<%= preview_image_manuscript_path(@manuscript) %>" class="fax-pdf-preview" style="width: 100%; height: 700px; border: 1px solid #ddd;" title="FAX原稿PDFプレビュー"></iframe>
+        <% elsif @manuscript.generated_structure.present? && @manuscript.prompt_generated? %>
+          <div class="empty-preview">
+            <h3>PDFがまだ生成されていません</h3>
+            <p>原稿構成は作成済みです。下のボタンからPDFを生成してください。</p>
+            <%= button_to "PDFを生成する", generate_pdf_manuscript_path(@manuscript), method: :post, class: "primary-button", form: { data: { loading_message: "PDFを生成中..." } } %>
+          </div>
         <% else %>
           <div class="empty-preview">
             <h3>まだ生成されていません</h3>
-            <%= button_to "生成開始", generate_manuscript_path(@manuscript), method: :post, class: "primary-button" %>
+            <% if @manuscript.can_generate_prompt? %>
+              <%= link_to "原稿構成を作成する", prompt_manuscript_path(@manuscript), class: "primary-button" %>
+            <% end %>
           </div>
         <% end %>
       </section>
 
       <aside class="detail-side">
-        <section class="info-card">
-          <h2>生成された本文</h2>
-          <div class="generated-body-text">
-            <%= simple_format(@manuscript.generated_body) %>
-          </div>
-        </section>
-
         <section class="info-card">
           <h2>原稿情報</h2>
           <dl class="info-list">
@@ -60,13 +64,23 @@
           </dl>
         </section>
 
+        <% if @manuscript.generated_body.present? %>
+          <section class="info-card">
+            <h2>生成された本文</h2>
+            <div class="generated-body-text">
+              <%= simple_format(@manuscript.generated_body) %>
+            </div>
+          </section>
+        <% end %>
+
         <section class="info-card">
           <h2>編集・再生成</h2>
-          <%= form_with url: regenerate_manuscript_path(@manuscript), class: "regenerate-form" do |form| %>
-            <%= form.text_area :edit_instruction, rows: 6, maxlength: 500, placeholder: "例）電話番号をもっと大きくしてください\n緊急感を強めてください\nキャッチコピーを変更してください" %>
-            <%= form.submit "再生成する", class: "primary-submit" %>
+          <% if @manuscript.can_generate_prompt? %>
+            <%= link_to "原稿構成を確認する", prompt_manuscript_path(@manuscript), class: "secondary-button" %>
           <% end %>
-          <p class="form-hint">具体的な指示ほど、意図に近い結果になります。</p>
+          <% if @manuscript.prompt_generated? && @manuscript.generated_structure.present? %>
+            <%= button_to "PDFを再生成", generate_pdf_manuscript_path(@manuscript), method: :post, class: "primary-submit", form: { data: { loading_message: "PDFを生成中..." } } %>
+          <% end %>
         </section>
 
         <section class="info-card">

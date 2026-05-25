@@ -20,7 +20,7 @@
 
     <%= form_with url: manuscripts_path, method: :get, class: "filter-bar" do |form| %>
       <%= form.search_field :q, value: params[:q], placeholder: "原稿タイトル・サービス名・ターゲットで検索" %>
-      <%= form.select :status, [["ステータス：すべて", ""], ["完成", "generated"], ["レビュー中", "reviewing"], ["下書き", "draft"]], selected: params[:status] %>
+      <%= form.select :status, [["ステータス：すべて", ""], ["原稿生成完了", "generated"], ["構成生成完了", "prompt_generated"], ["構成生成中", "prompt_generating"], ["下書き", "draft"], ["生成失敗", "failed"]], selected: params[:status] %>
       <%= form.submit "検索", class: "secondary-button" %>
     <% end %>
 

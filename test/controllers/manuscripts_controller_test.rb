@@ -14,7 +14,7 @@ class ManuscriptsControllerTest < ActionDispatch::IntegrationTest
     post login_path, params: { email: @user.email, password: "password" }
   end
 
-  test "creates and generates manuscript" do
+  test "creates manuscript and generates prompt" do
     assert_difference -> { Manuscript.count }, 1 do
       post manuscripts_path, params: {
         commit_action: "generate",
@@ -23,27 +23,58 @@ class ManuscriptsControllerTest < ActionDispatch::IntegrationTest
     end
 
     manuscript = Manuscript.order(:created_at).last
-    assert_redirected_to manuscript_path(manuscript)
-    assert_equal "generated", manuscript.status
-    assert manuscript.generated_body.present?
-    assert manuscript.generated_svg_path.present?
-    assert manuscript.generated_pdf_path.present?
-    assert_equal 1, manuscript.manuscript_versions.count
+    assert_redirected_to prompt_manuscript_path(manuscript)
+    assert_includes %w[prompt_generated prompt_generating], manuscript.status
+    assert manuscript.image_prompt.present?
+    assert manuscript.generated_structure.present?
   end
 
-  test "downloads pdf and regenerates with instruction" do
+  test "saves draft without generating prompt" do
+    assert_difference -> { Manuscript.count }, 1 do
+      post manuscripts_path, params: {
+        commit_action: "draft",
+        manuscript: manuscript_params
+      }
+    end
+
+    manuscript = Manuscript.order(:created_at).last
+    assert_redirected_to manuscript_path(manuscript)
+    assert_equal "draft", manuscript.status
+  end
+
+  test "generates pdf from prompt and creates version" do
     manuscript = @company.manuscripts.create!(manuscript_params.merge(user: @user, status: "draft"))
-    ManuscriptGenerationService.new(manuscript).generate!
+    Ai::FaxPromptGenerator.new(manuscript).generate!
+    manuscript.reload
+    assert manuscript.generated_structure.present?
+
+    assert_difference -> { manuscript.manuscript_versions.count }, 1 do
+      post generate_image_manuscript_path(manuscript)
+    end
+
+    manuscript.reload
+    assert_equal "generated", manuscript.status
+    assert manuscript.generated_pdf_path.present?
+  end
+
+  test "regenerates prompt" do
+    manuscript = @company.manuscripts.create!(manuscript_params.merge(user: @user, status: "draft"))
+    Ai::FaxPromptGenerator.new(manuscript).generate!
+
+    post regenerate_prompt_manuscript_path(manuscript)
+    assert_redirected_to prompt_manuscript_path(manuscript)
+    manuscript.reload
+    assert manuscript.generated_structure.present?
+  end
+
+  test "downloads pdf" do
+    manuscript = @company.manuscripts.create!(manuscript_params.merge(user: @user, status: "draft"))
+    Ai::FaxPromptGenerator.new(manuscript).generate!
+    ManuscriptGenerationService.new(manuscript).generate_image_and_pdf!
 
     get pdf_manuscript_path(manuscript)
     assert_response :success
     assert_equal "application/pdf", response.media_type
-
-    assert_difference -> { manuscript.manuscript_versions.count }, 1 do
-      post regenerate_manuscript_path(manuscript), params: { edit_instruction: "緊急感を強めてください" }
-    end
-
-    assert_redirected_to manuscript_path(manuscript)
   end
 
   test "uses template to prefill new manuscript form" do

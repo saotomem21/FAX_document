@@ -14,7 +14,7 @@
     <li class="active"><span>1</span>基本情報</li>
     <li><span>2</span>訴求設計</li>
     <li><span>3</span>掲載情報</li>
-    <li><span>4</span>確認</li>
+    <li><span>4</span>プロンプト確認</li>
   </ol>
 
   <div class="form-layout">
@@ -149,7 +149,7 @@
   </section>
 
   <section class="form-card confirm-card">
-    <h2>Step4 確認</h2>
+    <h2>Step4 プロンプト確認</h2>
     <label class="checkbox-row">
       <%= check_box_tag :save_as_template, "1" %>
       <span>この入力内容をテンプレートとして保存する</span>
@@ -162,7 +162,7 @@
 
   <div class="sticky-actions">
     <%= link_to "戻る", manuscripts_path, class: "secondary-button" %>
-    <button type="submit" name="commit_action" value="draft" class="secondary-button">下書き保存</button>
-    <button type="submit" name="commit_action" value="generate" class="primary-button">生成開始</button>
+    <button type="submit" name="commit_action" value="draft" class="secondary-button" data-loading-message="下書きを保存中...">下書き保存</button>
+    <button type="submit" name="commit_action" value="generate" class="primary-button" data-loading-message="プロンプトを生成中...">プロンプトを生成する</button>
   </div>
 <% end %>

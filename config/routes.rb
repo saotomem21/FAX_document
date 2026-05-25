@@ -17,9 +17,13 @@ Rails.application.routes.draw do
 
   resources :manuscripts do
     member do
-      post :generate
-      post :regenerate
+      post :generate_prompt
+      post :regenerate_prompt
+      post :generate_pdf
+      post :generate_image # backward compat, delegates to generate_pdf
+      patch :update_prompt
       post :duplicate
+      get :prompt
       get :preview_image
       get :pdf
     end

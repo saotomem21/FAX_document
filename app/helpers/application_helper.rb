@@ -1,8 +1,15 @@
 module ApplicationHelper
+  def presentation_mode?
+    Ai::FaxPromptGenerator::PRESENTATION_MODE
+  end
+
   def status_badge_class(status)
     {
       "generated" => "success",
-      "reviewing" => "warning",
+      "prompt_generated" => "prompt",
+      "prompt_generating" => "warning",
+      "image_generating" => "warning",
+      "failed" => "danger",
       "draft" => "neutral"
     }.fetch(status, "neutral")
   end

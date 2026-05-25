@@ -1,6 +1,8 @@
 class ManuscriptsController < ApplicationController
   before_action :require_login
-  before_action :set_manuscript, only: %i[show edit update destroy generate regenerate duplicate preview_image pdf]
+  before_action :set_manuscript, only: %i[show edit update destroy
+    generate_prompt regenerate_prompt generate_pdf generate_image
+    duplicate prompt update_prompt pdf preview_image]
 
   def index
     @manuscripts = current_company.manuscripts.latest_first
@@ -28,7 +30,7 @@ class ManuscriptsController < ApplicationController
 
     if @manuscript.save
       save_template_from(@manuscript) if params[:save_as_template] == "1"
-      generate_and_redirect(@manuscript)
+      generate_prompt_and_redirect(@manuscript)
     else
       render :new, status: :unprocessable_entity
     end
@@ -40,20 +42,69 @@ class ManuscriptsController < ApplicationController
   def update
     if @manuscript.update(manuscript_params)
       save_template_from(@manuscript) if params[:save_as_template] == "1"
-      generate_and_redirect(@manuscript)
+      generate_prompt_and_redirect(@manuscript)
     else
       render :edit, status: :unprocessable_entity
     end
   end
 
-  def generate
-    ManuscriptGenerationService.new(@manuscript).generate!
-    redirect_to @manuscript, notice: "原稿を生成しました。"
+  # GET /manuscripts/:id/prompt - 原稿構成確認画面
+  def prompt
+    unless @manuscript.prompt_generated? || @manuscript.can_generate_prompt?
+      redirect_to @manuscript, alert: "構成確認画面を表示できません。先にフォーム入力から構成を生成してください。"
+    end
+    @structure = @manuscript.generated_structure
+    @structure = JSON.parse(@structure) if @structure.is_a?(String)
+    # Backward compat: detect old format and suggest regeneration
+    @needs_regeneration = @structure.present? && (@structure["target_label"].nil? && @structure["problem_points"].nil?)
   end
 
-  def regenerate
-    ManuscriptGenerationService.new(@manuscript, edit_instruction: params[:edit_instruction]).generate!
-    redirect_to @manuscript, notice: "編集指示を反映して再生成しました。"
+  # POST /manuscripts/:id/generate_prompt - generate structure from form inputs
+  def generate_prompt
+    begin
+      Ai::FaxPromptGenerator.new(@manuscript).generate!
+      redirect_to prompt_manuscript_path(@manuscript), notice: "原稿構成を生成しました。内容を確認してください。"
+    rescue => e
+      Rails.logger.error "Structure generation failed: #{e.message}"
+      redirect_to @manuscript, alert: "構成生成に失敗しました。もう一度お試しください。"
+    end
+  end
+
+  # PATCH /manuscripts/:id/update_prompt - save user edits (no-op as structure is stored differently)
+  def update_prompt
+    redirect_to prompt_manuscript_path(@manuscript), notice: "構成を保存しました。"
+  end
+
+  # POST /manuscripts/:id/regenerate_prompt - regenerate structure from form inputs
+  def regenerate_prompt
+    begin
+      Ai::FaxPromptGenerator.new(@manuscript).generate!
+      redirect_to prompt_manuscript_path(@manuscript), notice: "原稿構成を再生成しました。内容を確認してください。"
+    rescue => e
+      Rails.logger.error "Structure regeneration failed: #{e.message}"
+      redirect_to prompt_manuscript_path(@manuscript), alert: "構成再生成に失敗しました。もう一度お試しください。"
+    end
+  end
+
+  # POST /manuscripts/:id/generate_pdf - generate PDF from structure
+  def generate_pdf
+    unless @manuscript.prompt_generated? && @manuscript.generated_structure.present?
+      redirect_to prompt_manuscript_path(@manuscript), alert: "先に原稿構成を生成・確認してください。"
+      return
+    end
+
+    begin
+      ManuscriptGenerationService.new(@manuscript).generate_pdf!
+      redirect_to @manuscript, notice: "FAX原稿PDFを生成しました。"
+    rescue => e
+      Rails.logger.error "PDF generation failed: #{e.message}"
+      redirect_to @manuscript, alert: "原稿生成に失敗しました。もう一度お試しください。"
+    end
+  end
+
+  # Keep generate_image for backward compatibility, delegates to generate_pdf
+  def generate_image
+    generate_pdf
   end
 
   def duplicate
@@ -70,17 +121,22 @@ class ManuscriptsController < ApplicationController
     redirect_to manuscripts_path, notice: "原稿を削除しました。"
   end
 
+  # GET /manuscripts/:id/preview_image - serve PDF as inline preview
   def preview_image
-    ManuscriptGenerationService.new(@manuscript).generate! if @manuscript.generated_svg_path.blank?
-    path = Rails.root.join(@manuscript.generated_svg_path)
+    if @manuscript.generated_pdf_path.blank? && @manuscript.generated_structure.present?
+      ManuscriptGenerationService.new(@manuscript).generate_pdf!
+    end
+    path = Rails.root.join(@manuscript.generated_pdf_path.to_s)
     return head :not_found unless path.exist?
 
-    send_file path, type: "image/svg+xml", disposition: "inline"
+    send_file path, type: "application/pdf", disposition: "inline"
   end
 
   def pdf
-    ManuscriptGenerationService.new(@manuscript).generate! if @manuscript.generated_pdf_path.blank?
-    path = Rails.root.join(@manuscript.generated_pdf_path)
+    if @manuscript.generated_pdf_path.blank? && @manuscript.generated_structure.present?
+      ManuscriptGenerationService.new(@manuscript).generate_pdf!
+    end
+    path = Rails.root.join(@manuscript.generated_pdf_path.to_s)
     return redirect_to(@manuscript, alert: "PDFを生成できませんでした。") unless path.exist?
 
     send_file path,
@@ -112,10 +168,15 @@ class ManuscriptsController < ApplicationController
     )
   end
 
-  def generate_and_redirect(manuscript)
+  def generate_prompt_and_redirect(manuscript)
     if params[:commit_action] == "generate"
-      ManuscriptGenerationService.new(manuscript).generate!
-      redirect_to manuscript, notice: "原稿を生成しました。"
+      begin
+        Ai::FaxPromptGenerator.new(manuscript).generate!
+        redirect_to prompt_manuscript_path(manuscript), notice: "プロンプトを生成しました。内容を確認してください。"
+      rescue => e
+        Rails.logger.error "Prompt generation failed: #{e.message}"
+        redirect_to manuscript, alert: "プロンプト生成に失敗しました。下書きとして保存しました。"
+      end
     else
       redirect_to manuscript, notice: "下書きを保存しました。"
     end
@@ -125,7 +186,7 @@ class ManuscriptsController < ApplicationController
     current_company.templates.create!(
       manuscript.form_attributes.merge(
         user: current_user,
-        title: params[:template_title].presence || "#{manuscript.service_name}テンプレート",
+        title: params[:template_title].presence || Time.current.strftime("%Y/%m/%d/%H/%M/%S"),
         description: "#{manuscript.target}向け / #{manuscript.purpose}"
       )
     )

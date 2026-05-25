@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_05_25_000500) do
+ActiveRecord::Schema[7.2].define(version: 2026_05_25_004041) do
   create_table "companies", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "plan_name", default: "スタンダードプラン", null: false
@@ -30,6 +30,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_25_000500) do
     t.string "generated_pdf_path"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.json "generated_structure"
+    t.string "generated_image_path"
     t.index ["manuscript_id", "version_number"], name: "index_manuscript_versions_on_manuscript_id_and_version_number", unique: true
     t.index ["manuscript_id"], name: "index_manuscript_versions_on_manuscript_id"
   end
@@ -64,6 +66,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_25_000500) do
     t.string "generated_pdf_path"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.json "generated_structure"
+    t.datetime "image_prompt_approved_at"
+    t.datetime "prompt_generated_at"
+    t.datetime "image_generated_at"
+    t.string "generated_image_path"
     t.index ["company_id", "status"], name: "index_manuscripts_on_company_id_and_status"
     t.index ["company_id", "updated_at"], name: "index_manuscripts_on_company_id_and_updated_at"
     t.index ["company_id"], name: "index_manuscripts_on_company_id"

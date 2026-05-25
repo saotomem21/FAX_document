@@ -677,6 +677,266 @@ textarea:focus {
   background: #eef2f7;
 }
 
+.status-badge.prompt {
+  color: #4400b0;
+  background: #f2eaff;
+}
+
+.status-badge.danger {
+  color: var(--red);
+  background: var(--red-bg);
+}
+
+.mode-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  margin-top: 6px;
+}
+
+.mode-badge.presentation {
+  color: #6611aa;
+  background: #f2eaff;
+  border: 1px solid #d4b8f0;
+}
+
+/* Prompt Confirmation Layout */
+.prompt-layout {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.prompt-summary {
+  display: grid;
+  gap: 18px;
+}
+
+.prompt-editor-card {
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 10px 28px rgba(24, 39, 75, 0.04);
+}
+
+.prompt-editor-card h2 {
+  margin: 0 0 8px;
+}
+
+.prompt-guide {
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-weight: 800;
+  line-height: 1.7;
+}
+
+.prompt-form {
+  display: grid;
+  gap: 18px;
+}
+
+.prompt-textarea {
+  min-height: 320px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", Meiryo, sans-serif;
+  font-size: 14px;
+  line-height: 1.8;
+  resize: vertical;
+  background: #fafbfd;
+}
+
+.prompt-notice {
+  padding: 14px;
+  border: 1px solid #ffe3a0;
+  border-radius: 8px;
+  background: #fffdf5;
+}
+
+.prompt-notice strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--amber);
+  font-size: 14px;
+}
+
+.prompt-notice p {
+  margin: 0;
+  color: #664411;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.generated-body-preview {
+  margin: 0;
+}
+
+.generated-body-preview h3 {
+  margin: 0 0 4px;
+}
+
+.generated-body-scroll {
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fafbfd;
+}
+
+.generated-body-text {
+  font-size: 13px;
+  line-height: 2;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
+.prompt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Detail page prompt display */
+.prompt-details {
+  margin-bottom: 14px;
+}
+
+.prompt-details summary {
+  cursor: pointer;
+  color: var(--blue);
+  font-weight: 900;
+  padding: 4px 0;
+}
+
+.prompt-text {
+  margin: 10px 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fafbfd;
+  font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", Meiryo, sans-serif;
+  font-size: 13px;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.prompt-copy-actions {
+  margin-bottom: 12px;
+}
+
+.prompt-regenerate {
+  margin-top: 12px;
+}
+
+.prompt-edit-textarea {
+  min-height: 120px;
+  margin-bottom: 10px;
+  font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", Meiryo, sans-serif;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.inline-form {
+  display: grid;
+  gap: 10px;
+}
+
+/* Summary lists on prompt page */
+.summary-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+
+.summary-list dt,
+.summary-list dd {
+  margin: 0;
+  padding: 12px 0;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.summary-list dt {
+  color: #53627a;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.summary-list dd {
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+.point-list {
+  margin: 0;
+  padding: 0 0 0 18px;
+  list-style: disc;
+  line-height: 1.7;
+}
+
+/* Spinner */
+.spinner {
+  width: 52px;
+  height: 52px;
+  border: 4px solid #dbe4ef;
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(245, 248, 252, 0.85);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.loading-overlay.active {
+  display: grid;
+  place-items: center;
+}
+
+.loading-overlay-content {
+  display: grid;
+  place-items: center;
+  gap: 16px;
+  padding: 48px;
+  text-align: center;
+}
+
+.loading-overlay-content h2 {
+  margin: 0;
+  font-size: 22px;
+  color: var(--ink);
+}
+
+.loading-overlay-content p {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.loading-overlay .spinner {
+  width: 56px;
+  height: 56px;
+  border-width: 5px;
+}
+
 .list-footer {
   display: flex;
   justify-content: space-between;
@@ -998,12 +1258,58 @@ label em {
   justify-content: flex-end;
 }
 
+/* Structure preview */
+.structure-preview {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.structure-section {
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdff;
+}
+
+.structure-section h3 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: #53627a;
+}
+
+.structure-value {
+  margin: 0;
+  font-weight: 800;
+  line-height: 1.7;
+}
+
+.structure-value.headline {
+  font-size: 20px;
+  font-weight: 900;
+  color: #111;
+}
+
+.structure-value.cta {
+  font-size: 17px;
+  font-weight: 900;
+  color: #111;
+  padding: 10px 14px;
+  border-left: 4px solid #111;
+  background: #f0f0f0;
+}
+
+.fax-pdf-preview {
+  background: #ffffff;
+}
+
 @media (max-width: 1180px) {
   .login-page,
   .app-shell,
   .detail-layout,
   .form-layout,
-  .template-card {
+  .template-card,
+  .prompt-layout {
     grid-template-columns: 1fr;
   }
 
