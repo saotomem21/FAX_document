@@ -22,6 +22,51 @@
   </head>
 
   <body>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
+      <div class="loading-overlay-content">
+        <div class="spinner"></div>
+        <h2 id="loading-message">処理中...</h2>
+        <p>このままお待ちください。画面を閉じないでください。</p>
+      </div>
+    </div>
+
     <%= yield %>
+
+    <script>
+      (function() {
+        var overlay = document.getElementById('loading-overlay');
+        var messageEl = document.getElementById('loading-message');
+        var pendingMessage = null;
+        if (!overlay) return;
+
+        function showLoading(message) {
+          if (message && messageEl) messageEl.textContent = message;
+          overlay.classList.add('active');
+          overlay.setAttribute('aria-hidden', 'false');
+        }
+
+        // Track which submit button was clicked via mousedown (fires before blur/confirm)
+        document.addEventListener('mousedown', function(e) {
+          var btn = e.target.closest('button[type="submit"], input[type="submit"]');
+          if (btn) {
+            var form = btn.closest('form');
+            pendingMessage = btn.getAttribute('data-loading-message') || (form && form.getAttribute('data-loading-message')) || null;
+          }
+        });
+
+        // Intercept form submissions
+        document.addEventListener('submit', function(e) {
+          var form = e.target.closest('form');
+          if (!form) return;
+
+          var msg = pendingMessage || form.getAttribute('data-loading-message');
+          if (msg) {
+            showLoading(msg);
+          }
+          pendingMessage = null;
+        });
+      })();
+    </script>
   </body>
 </html>

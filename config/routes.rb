@@ -11,5 +11,23 @@ Rails.application.routes.draw do
 
   root "manuscripts#index"
 
-  get "manuscripts" => "manuscripts#index"
+  get "login" => "sessions#new"
+  post "login" => "sessions#create"
+  delete "logout" => "sessions#destroy"
+
+  resources :manuscripts do
+    member do
+      post :generate_prompt
+      post :regenerate_prompt
+      post :generate_pdf
+      post :generate_image # backward compat, delegates to generate_pdf
+      patch :update_prompt
+      post :duplicate
+      get :prompt
+      get :preview_image
+      get :pdf
+    end
+  end
+
+  resources :templates, except: :show
 end

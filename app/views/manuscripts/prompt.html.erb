@@ -1,0 +1,219 @@
+<% content_for :title, "原稿構成確認 | FAX原稿AI" %>
+
+<div class="app-shell">
+  <%= render "shared/sidebar", active: :manuscripts %>
+
+  <main class="main-area">
+    <%= render "shared/topbar" %>
+    <%= render "shared/flash" %>
+
+    <section class="page-heading">
+      <div>
+        <p class="breadcrumb"><%= link_to "原稿一覧", manuscripts_path %> ＞ 原稿構成確認</p>
+        <h1>原稿構成確認</h1>
+        <p>入力内容をもとに、AIがFAX原稿の構成案を作成しました。内容を確認し、必要に応じて再生成してください。</p>
+        <% if presentation_mode? %>
+          <span class="mode-badge presentation">📽️ プレゼンテーションモード</span>
+        <% end %>
+      </div>
+      <div class="heading-actions">
+        <%= link_to "原稿一覧に戻る", manuscripts_path, class: "secondary-button" %>
+      </div>
+    </section>
+
+    <div class="prompt-layout">
+      <!-- Left: Input Summary -->
+      <aside class="prompt-summary">
+        <section class="info-card">
+          <h2>入力内容サマリー</h2>
+          <dl class="summary-list">
+            <dt>サービス名</dt>
+            <dd><%= @manuscript.service_name.presence || "未入力" %></dd>
+
+            <dt>会社名</dt>
+            <dd><%= @manuscript.display_company_name.presence || "未入力" %></dd>
+
+            <dt>ターゲット</dt>
+            <dd><%= @manuscript.target.presence || "未入力" %></dd>
+
+            <dt>目的</dt>
+            <dd><%= @manuscript.purpose.presence || "未入力" %></dd>
+
+            <dt>問い合わせ導線</dt>
+            <dd><%= @manuscript.contact_methods.presence || "未入力" %></dd>
+
+            <dt>対象地域</dt>
+            <dd><%= @manuscript.target_region.presence || "未入力" %></dd>
+          </dl>
+        </section>
+
+        <section class="info-card">
+          <h2>掲載される会社情報</h2>
+          <dl class="summary-list">
+            <dt>TEL</dt>
+            <dd><%= @manuscript.phone_number.presence || (presentation_mode? ? "03-1234-5678" : "000-0000-0000") %></dd>
+            <dt>FAX</dt>
+            <dd><%= @manuscript.fax_number.presence || (presentation_mode? ? "03-1234-5679" : "000-0000-0000") %></dd>
+            <dt>Email</dt>
+            <dd><%= @manuscript.email.presence || "info@example.jp" %></dd>
+            <dt>URL</dt>
+            <dd><%= @manuscript.website_url.presence || "https://example.jp" %></dd>
+            <dt>住所</dt>
+            <dd><%= @manuscript.address.presence || (presentation_mode? ? "〒100-0001 東京都○○区○○ 1-2-3" : "〒000-0000 〇〇県〇〇市〇〇") %></dd>
+            <dt>受付時間</dt>
+            <dd><%= @manuscript.reception_hours.presence || "平日 9:00〜18:00" %></dd>
+            <dt>対応エリア</dt>
+            <dd><%= @manuscript.target_region.presence || (presentation_mode? ? "東京都・神奈川県・埼玉県" : "〇〇エリア") %></dd>
+            <dt>担当部署</dt>
+            <dd><%= @manuscript.try(:department).presence || "営業部" %></dd>
+          </dl>
+        </section>
+      </aside>
+
+      <!-- Center: Structure Editor -->
+      <section class="prompt-editor-card">
+        <h2>AIが生成した原稿構成</h2>
+        <p class="prompt-guide">以下の構成でFAX原稿PDFを生成します。内容を確認してください。</p>
+
+        <% if @structure.present? %>
+          <% if @needs_regeneration %>
+            <div class="prompt-notice">
+              <strong>⚠️ 構成フォーマットが古いバージョンです</strong>
+              <p>以前の構成JSONが古いフォーマットです。「構成を再生成する」ボタンを押して、新しいフォーマットで再生成してください。</p>
+            </div>
+          <% end %>
+          <div class="structure-preview">
+            <% if @structure["target_label"].present? %>
+              <div class="structure-section">
+                <h3>📌 宛先呼びかけ</h3>
+                <p class="structure-value"><%= @structure["target_label"] %></p>
+              </div>
+            <% end %>
+
+            <div class="structure-section">
+              <h3>📢 キャッチコピー</h3>
+              <p class="structure-value headline"><%= @structure["headline"] %></p>
+            </div>
+
+            <% if @structure["subheadline"].present? %>
+              <div class="structure-section">
+                <h3>📝 サブ見出し</h3>
+                <p class="structure-value"><%= @structure["subheadline"] %></p>
+              </div>
+            <% end %>
+
+            <% if @structure["problem_points"].present? %>
+              <div class="structure-section">
+                <h3>⚠️ 課題</h3>
+                <ul class="point-list">
+                  <% Array(@structure["problem_points"]).each do |point| %>
+                    <li><%= point %></li>
+                  <% end %>
+                </ul>
+              </div>
+            <% end %>
+
+            <% if @structure["solution_points"].present? %>
+              <div class="structure-section">
+                <h3>✅ 解決策</h3>
+                <ul class="point-list">
+                  <% Array(@structure["solution_points"]).each do |point| %>
+                    <li><%= point %></li>
+                  <% end %>
+                </ul>
+              </div>
+            <% end %>
+
+            <% if @structure["service_items"].present? %>
+              <div class="structure-section">
+                <h3>📦 サービス内容</h3>
+                <ul class="point-list">
+                  <% Array(@structure["service_items"]).each do |item| %>
+                    <li><%= item %></li>
+                  <% end %>
+                </ul>
+              </div>
+            <% end %>
+
+            <% if @structure["strengths"].present? %>
+              <div class="structure-section">
+                <h3>⭐ 強み</h3>
+                <ul class="point-list">
+                  <% Array(@structure["strengths"]).each do |item| %>
+                    <li>✓ <%= item %></li>
+                  <% end %>
+                </ul>
+              </div>
+            <% end %>
+
+            <% if @structure["cta"].present? %>
+              <div class="structure-section">
+                <h3>📞 問い合わせCTA</h3>
+                <p class="structure-value cta"><%= @structure["cta"] %></p>
+              </div>
+            <% end %>
+
+            <% if @structure["reply_form_fields"].present? %>
+              <div class="structure-section">
+                <h3>📋 返信フォーム項目</h3>
+                <ul class="point-list">
+                  <% Array(@structure["reply_form_fields"]).each do |field| %>
+                    <li><%= field %></li>
+                  <% end %>
+                </ul>
+              </div>
+            <% end %>
+
+            <% if @structure["footer_note"].present? %>
+              <div class="structure-section">
+                <h3>📄 配信停止案内</h3>
+                <p class="structure-value"><%= @structure["footer_note"] %></p>
+              </div>
+            <% end %>
+          </div>
+
+          <% if @manuscript.generated_body.present? %>
+            <section class="generated-body-preview">
+              <h3>📄 生成された本文（プレビュー）</h3>
+              <div class="generated-body-scroll">
+                <%= simple_format(@manuscript.generated_body, class: "generated-body-text") %>
+              </div>
+            </section>
+          <% end %>
+        <% else %>
+          <div class="empty-preview">
+            <p>まだ構成が生成されていません。</p>
+          </div>
+        <% end %>
+
+        <% if presentation_mode? %>
+          <div class="prompt-notice">
+            <strong>📽️ プレゼンテーションモード</strong>
+            <p>これは社内プレゼン用の完成見本です。連絡先情報はサンプルデモ値（03-1234-5678 など）で補完されています。実運用では差し替えてください。</p>
+          </div>
+        <% else %>
+          <div class="prompt-notice">
+            <strong>⚠️ 注意</strong>
+            <p>連絡先情報（電話番号・FAX番号・メールアドレス・URL・住所）はAIに生成させず、フォーム入力値またはプレースホルダーが使用されます。No.1表記・実績・価格・割引なども入力値がない限り含まれません。</p>
+          </div>
+        <% end %>
+
+        <div class="prompt-actions">
+          <%= link_to "入力内容に戻る", edit_manuscript_path(@manuscript), class: "secondary-button" %>
+          <%= button_to "構成を再生成する",
+                regenerate_prompt_manuscript_path(@manuscript),
+                method: :post,
+                class: "secondary-button",
+                form: { data: { confirm: "現在の構成を破棄して再生成します。よろしいですか？", loading_message: "構成を再生成中..." } } %>
+          <% if @structure.present? %>
+            <%= button_to "この構成でPDFを生成",
+                  generate_pdf_manuscript_path(@manuscript),
+                  method: :post,
+                  class: "primary-button",
+                  form: { data: { loading_message: "PDFを生成中..." } } %>
+          <% end %>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>

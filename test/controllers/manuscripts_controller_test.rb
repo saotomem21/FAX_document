@@ -1,0 +1,109 @@
+require "test_helper"
+
+class ManuscriptsControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    @company = Company.create!(name: "株式会社テスト", monthly_generation_limit: 500)
+    @user = User.create!(
+      company: @company,
+      name: "佐藤 花子",
+      department: "営業企画部",
+      email: "planner@example.com",
+      password: "password",
+      password_confirmation: "password"
+    )
+    post login_path, params: { email: @user.email, password: "password" }
+  end
+
+  test "creates manuscript and generates prompt" do
+    assert_difference -> { Manuscript.count }, 1 do
+      post manuscripts_path, params: {
+        commit_action: "generate",
+        manuscript: manuscript_params
+      }
+    end
+
+    manuscript = Manuscript.order(:created_at).last
+    assert_redirected_to prompt_manuscript_path(manuscript)
+    assert_includes %w[prompt_generated prompt_generating], manuscript.status
+    assert manuscript.generated_structure.present?
+  end
+
+  test "saves draft without generating prompt" do
+    assert_difference -> { Manuscript.count }, 1 do
+      post manuscripts_path, params: {
+        commit_action: "draft",
+        manuscript: manuscript_params
+      }
+    end
+
+    manuscript = Manuscript.order(:created_at).last
+    assert_redirected_to manuscript_path(manuscript)
+    assert_equal "draft", manuscript.status
+  end
+
+  test "generates pdf from prompt and creates version" do
+    manuscript = @company.manuscripts.create!(manuscript_params.merge(user: @user, status: "draft"))
+    Ai::FaxPromptGenerator.new(manuscript).generate!
+    manuscript.reload
+    assert manuscript.generated_structure.present?
+
+    assert_difference -> { manuscript.manuscript_versions.count }, 1 do
+      post generate_image_manuscript_path(manuscript)
+    end
+
+    manuscript.reload
+    assert_equal "generated", manuscript.status
+    assert manuscript.generated_pdf_path.present?
+  end
+
+  test "regenerates prompt" do
+    manuscript = @company.manuscripts.create!(manuscript_params.merge(user: @user, status: "draft"))
+    Ai::FaxPromptGenerator.new(manuscript).generate!
+
+    post regenerate_prompt_manuscript_path(manuscript)
+    assert_redirected_to prompt_manuscript_path(manuscript)
+    manuscript.reload
+    assert manuscript.generated_structure.present?
+  end
+
+  test "downloads pdf" do
+    manuscript = @company.manuscripts.create!(manuscript_params.merge(user: @user, status: "draft"))
+    Ai::FaxPromptGenerator.new(manuscript).generate!
+    ManuscriptGenerationService.new(manuscript).generate_image_and_pdf!
+
+    get pdf_manuscript_path(manuscript)
+    assert_response :success
+    assert_equal "application/pdf", response.media_type
+  end
+
+  test "uses template to prefill new manuscript form" do
+    template = @company.templates.create!(manuscript_params.merge(user: @user, title: "営業支援テンプレート"))
+
+    get new_manuscript_path(template_id: template.id)
+
+    assert_response :success
+    assert_select "input[value='#{template.service_name}']"
+  end
+
+  private
+
+  def manuscript_params
+    {
+      title: "足場工事向けDM",
+      company_name: "株式会社テスト",
+      service_name: "足場工事サービス",
+      service_summary: "足場工事と仮設機材の手配をまとめて支援します。",
+      target_region: "関東",
+      target: "工務店のご担当者様",
+      purpose: "新規問い合わせ獲得",
+      contact_methods: "電話・FAX返信",
+      catch_copy: "急な足場手配でお困りの方へ！",
+      strengths: "迅速対応、地域密着、安全管理",
+      urgency_reason: "繁忙期前に早めのご相談をおすすめします。",
+      phone_number: "03-1111-2222",
+      fax_number: "03-1111-2223",
+      website_url: "https://example.jp",
+      reception_hours: "平日 9:00〜18:00"
+    }
+  end
+end

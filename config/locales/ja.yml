@@ -1,0 +1,34 @@
+ja:
+  activerecord:
+    models:
+      manuscript: "原稿"
+    attributes:
+      manuscript:
+        title: "原稿タイトル"
+        service_name: "サービス名"
+        service_summary: "サービス概要"
+        target: "ターゲット"
+        purpose: "FAXDMの目的"
+        contact_methods: "問い合わせ導線"
+        company_name: "会社名"
+        target_region: "対象エリア"
+        catch_copy: "キャッチコピー"
+        strengths: "強み"
+        urgency_reason: "緊急性"
+        phone_number: "電話番号"
+        fax_number: "FAX番号"
+        email: "メールアドレス"
+        website_url: "WEBサイト"
+        reception_hours: "受付時間"
+        address: "住所"
+        credibility: "信頼情報"
+        opt_out_notice: "配信停止文言"
+  errors:
+    format: "%{attribute}%{message}"
+    messages:
+      blank: "を入力してください"
+      inclusion: "は一覧に含まれていません"
+      invalid: "は不正な値です"
+    models:
+      manuscript:
+        blank: "%{attribute}を入力してください"

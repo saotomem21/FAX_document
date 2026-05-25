@@ -1,0 +1,103 @@
+<% content_for :title, "#{@manuscript.title} | FAX原稿AI" %>
+
+<div class="app-shell">
+  <%= render "shared/sidebar", active: :manuscripts %>
+
+  <main class="main-area">
+    <%= render "shared/topbar" %>
+    <%= render "shared/flash" %>
+
+    <section class="page-heading">
+      <div>
+        <p class="breadcrumb"><%= link_to "原稿一覧", manuscripts_path %> ＞ 原稿詳細</p>
+        <h1>原稿詳細</h1>
+        <p>生成したFAX原稿PDFを確認・ダウンロードできます。</p>
+        <% if presentation_mode? %>
+          <span class="mode-badge presentation">📽️ プレゼンテーションモード</span>
+        <% end %>
+      </div>
+      <div class="heading-actions">
+        <%= link_to "原稿一覧に戻る", manuscripts_path, class: "secondary-button" %>
+        <%= link_to "PDFダウンロード", pdf_manuscript_path(@manuscript), class: "secondary-button" %>
+        <%= button_to "複製", duplicate_manuscript_path(@manuscript), method: :post, class: "secondary-button" %>
+        <%= button_to "削除", manuscript_path(@manuscript), method: :delete, class: "danger-button" %>
+      </div>
+    </section>
+
+    <div class="detail-layout">
+      <section class="preview-card">
+        <h2>FAX原稿プレビュー <small>（A4・モノクロ・FAX送信用）</small></h2>
+        <% if @manuscript.generated? && @manuscript.generated_pdf_path.present? %>
+          <iframe src="<%= preview_image_manuscript_path(@manuscript) %>" class="fax-pdf-preview" style="width: 100%; height: 700px; border: 1px solid #ddd;" title="FAX原稿PDFプレビュー"></iframe>
+        <% elsif @manuscript.generated_structure.present? && @manuscript.prompt_generated? %>
+          <div class="empty-preview">
+            <h3>PDFがまだ生成されていません</h3>
+            <p>原稿構成は作成済みです。下のボタンからPDFを生成してください。</p>
+            <%= button_to "PDFを生成する", generate_pdf_manuscript_path(@manuscript), method: :post, class: "primary-button", form: { data: { loading_message: "PDFを生成中..." } } %>
+          </div>
+        <% else %>
+          <div class="empty-preview">
+            <h3>まだ生成されていません</h3>
+            <% if @manuscript.can_generate_prompt? %>
+              <%= link_to "原稿構成を作成する", prompt_manuscript_path(@manuscript), class: "primary-button" %>
+            <% end %>
+          </div>
+        <% end %>
+      </section>
+
+      <aside class="detail-side">
+        <section class="info-card">
+          <h2>原稿情報</h2>
+          <dl class="info-list">
+            <dt>サービス名</dt>
+            <dd><%= @manuscript.service_name %></dd>
+            <dt>ターゲット</dt>
+            <dd><%= @manuscript.target %></dd>
+            <dt>目的・用途</dt>
+            <dd><%= @manuscript.purpose %></dd>
+            <dt>連絡方法</dt>
+            <dd><%= @manuscript.contact_methods %></dd>
+            <dt>更新日</dt>
+            <dd><%= l(@manuscript.updated_at, format: :long) %></dd>
+            <dt>ステータス</dt>
+            <dd><mark class="status-badge <%= status_badge_class(@manuscript.status) %>"><%= @manuscript.status_label %></mark></dd>
+          </dl>
+        </section>
+
+        <% if @manuscript.generated_body.present? %>
+          <section class="info-card">
+            <h2>生成された本文</h2>
+            <div class="generated-body-text">
+              <%= simple_format(@manuscript.generated_body) %>
+            </div>
+          </section>
+        <% end %>
+
+        <section class="info-card">
+          <h2>編集・再生成</h2>
+          <% if @manuscript.can_generate_prompt? %>
+            <%= link_to "原稿構成を確認する", prompt_manuscript_path(@manuscript), class: "secondary-button" %>
+          <% end %>
+          <% if @manuscript.prompt_generated? && @manuscript.generated_structure.present? %>
+            <%= button_to "PDFを再生成", generate_pdf_manuscript_path(@manuscript), method: :post, class: "primary-submit", form: { data: { loading_message: "PDFを生成中..." } } %>
+          <% end %>
+        </section>
+
+        <section class="info-card">
+          <h2>バージョン履歴</h2>
+          <div class="version-list">
+            <% @versions.each do |version| %>
+              <article>
+                <strong>v<%= version.version_number %><%= "（この原稿）" if version == @versions.first %></strong>
+                <small><%= l(version.created_at, format: :long) %></small>
+                <% if version.edit_instruction.present? %>
+                  <p><%= version.edit_instruction %></p>
+                <% end %>
+              </article>
+            <% end %>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+</div>

@@ -1,0 +1,20 @@
+<% content_for :title, "新規作成 | FAX原稿AI" %>
+
+<div class="app-shell">
+  <%= render "shared/sidebar", active: :new_manuscript %>
+
+  <main class="main-area">
+    <%= render "shared/topbar" %>
+    <%= render "shared/flash" %>
+
+    <section class="page-heading compact">
+      <div>
+        <p class="breadcrumb"><%= link_to "原稿一覧", manuscripts_path %> ＞ 新規作成</p>
+        <h1>新規作成</h1>
+        <p>原稿の基本情報を入力し、AIが効果的なFAX原稿を設計します。</p>
+      </div>
+    </section>
+
+    <%= render "form", manuscript: @manuscript %>
+  </main>
+</div>

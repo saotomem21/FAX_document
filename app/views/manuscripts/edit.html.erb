@@ -1,0 +1,20 @@
+<% content_for :title, "原稿編集 | FAX原稿AI" %>
+
+<div class="app-shell">
+  <%= render "shared/sidebar", active: :new_manuscript %>
+
+  <main class="main-area">
+    <%= render "shared/topbar" %>
+    <%= render "shared/flash" %>
+
+    <section class="page-heading compact">
+      <div>
+        <p class="breadcrumb"><%= link_to "原稿詳細", manuscript_path(@manuscript) %> ＞ 編集</p>
+        <h1>原稿編集</h1>
+        <p>入力内容を修正し、必要に応じて再生成できます。</p>
+      </div>
+    </section>
+
+    <%= render "form", manuscript: @manuscript %>
+  </main>
+</div>

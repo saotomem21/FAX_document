@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile.local
     container_name: fax_manuscript_ai_web
-    command: bash -lc "rm -f tmp/pids/server.pid && bin/rails server -b 0.0.0.0 -p 3000"
+    command: bash -lc "rm -f tmp/pids/server.pid && bundle install && bin/rails server -b 0.0.0.0 -p 3000"
     ports:
       - "3000:3000"
     volumes:
@@ -19,6 +19,7 @@ services:
       DATABASE_USERNAME: root
       DATABASE_PASSWORD: password
       TZ: Asia/Tokyo
+      RUBYOPT: --parser=parse.y
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
     depends_on:
       database:

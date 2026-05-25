@@ -43,6 +43,10 @@ Rails.application.configure do
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 
+  # Docker Desktop file sharing can make file logging noisy on some hosts.
+  config.logger = ActiveSupport::Logger.new($stdout)
+  config.logger.formatter = config.log_formatter
+
   # Raise an error on page load if there are pending migrations.
   config.active_record.migration_error = :page_load
 

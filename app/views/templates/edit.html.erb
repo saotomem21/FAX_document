@@ -1,0 +1,20 @@
+<% content_for :title, "テンプレート編集 | FAX原稿AI" %>
+
+<div class="app-shell">
+  <%= render "shared/sidebar", active: :templates %>
+
+  <main class="main-area">
+    <%= render "shared/topbar" %>
+    <%= render "shared/flash" %>
+
+    <section class="page-heading compact">
+      <div>
+        <p class="breadcrumb"><%= link_to "テンプレート一覧", templates_path %> ＞ 編集</p>
+        <h1>テンプレート編集</h1>
+        <p>保存済みフォーム内容を更新します。</p>
+      </div>
+    </section>
+
+    <%= render "form", template: @template %>
+  </main>
+</div>

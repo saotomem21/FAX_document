@@ -1,0 +1,168 @@
+<%= form_with model: manuscript, class: "wizard-form" do |form| %>
+  <% if manuscript.errors.any? %>
+    <div class="form-errors">
+      <strong>入力内容を確認してください。</strong>
+      <ul>
+        <% manuscript.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <ol class="stepper">
+    <li class="active"><span>1</span>基本情報</li>
+    <li><span>2</span>訴求設計</li>
+    <li><span>3</span>掲載情報</li>
+    <li><span>4</span>プロンプト確認</li>
+  </ol>
+
+  <div class="form-layout">
+    <section class="form-card">
+      <h2>Step1 基本情報</h2>
+      <p>原稿の基本となる情報を入力してください。</p>
+
+      <div class="field-grid">
+        <label>
+          原稿タイトル <em>必須</em>
+          <%= form.text_field :title, maxlength: 50, placeholder: "例）急な足場手配でお困りの方へ" %>
+        </label>
+        <label>
+          会社名
+          <%= form.text_field :company_name, maxlength: 50, placeholder: "例）株式会社ネクスリンク" %>
+        </label>
+        <label>
+          サービス名 <em>必須</em>
+          <%= form.text_field :service_name, maxlength: 100, placeholder: "例）足場工事・仮設機材リースサービス" %>
+        </label>
+        <label>
+          対象地域
+          <%= form.text_field :target_region, maxlength: 100, placeholder: "例）東京都・神奈川県・埼玉県・千葉県" %>
+        </label>
+        <label class="wide">
+          サービス概要 <em>必須</em>
+          <%= form.text_area :service_summary, rows: 4, maxlength: 300, placeholder: "サービスの特徴や価値を簡潔に入力してください。" %>
+        </label>
+      </div>
+    </section>
+
+    <aside class="guide-card">
+      <h3>このステップで入力する内容</h3>
+      <ul>
+        <li>原稿タイトル</li>
+        <li>会社名</li>
+        <li>サービス名</li>
+        <li>サービス概要</li>
+        <li>対象地域</li>
+      </ul>
+      <div class="point-box">
+        <strong>ポイント</strong>
+        <p>誰に・何を・どのように伝えるかを具体的に入力すると、訴求の芯がぶれにくくなります。</p>
+      </div>
+    </aside>
+  </div>
+
+  <div class="form-layout">
+    <section class="form-card">
+      <h2>Step2 訴求設計</h2>
+      <p>ターゲットや目的に合わせて、FAXDMの訴求ポイントを設計します。</p>
+
+      <div class="field-grid">
+        <label>
+          ターゲット <em>必須</em>
+          <%= form.text_field :target, placeholder: "例）工務店・リフォーム会社のご担当者様" %>
+        </label>
+        <label>
+          FAXDMの目的 <em>必須</em>
+          <%= form.text_field :purpose, placeholder: "例）新規問い合わせ獲得" %>
+        </label>
+        <label>
+          問い合わせ導線 <em>必須</em>
+          <%= form.text_field :contact_methods, placeholder: "例）電話・FAX返信・Webフォーム" %>
+        </label>
+        <label>
+          キャッチコピー
+          <%= form.text_field :catch_copy, maxlength: 50, placeholder: "例）急な足場手配でお困りの方へ！" %>
+        </label>
+        <label class="wide">
+          強み・特徴
+          <%= form.text_area :strengths, rows: 3, placeholder: "例）迅速対応、地域密着、施工実績が豊富、安全第一" %>
+        </label>
+        <label class="wide">
+          今すぐ問い合わせる理由
+          <%= form.text_area :urgency_reason, rows: 3, maxlength: 120, placeholder: "例）繁忙期前にご相談いただくと、最短日程で対応できます。" %>
+        </label>
+      </div>
+    </section>
+
+    <aside class="guide-card summary-guide">
+      <h3>現在の入力内容</h3>
+      <dl>
+        <dt>サービス名</dt>
+        <dd><%= manuscript.service_name.presence || "未入力" %></dd>
+        <dt>ターゲット</dt>
+        <dd><%= manuscript.target.presence || "未入力" %></dd>
+        <dt>目的</dt>
+        <dd><%= manuscript.purpose.presence || "未入力" %></dd>
+      </dl>
+    </aside>
+  </div>
+
+  <section class="form-card">
+    <h2>Step3 掲載情報</h2>
+    <p>連絡先や配信停止文言など、原稿に掲載する情報を入力してください。</p>
+
+    <div class="field-grid">
+      <label>
+        電話番号
+        <%= form.text_field :phone_number, placeholder: "例）03-XXXX-XXXX" %>
+      </label>
+      <label>
+        FAX番号
+        <%= form.text_field :fax_number, placeholder: "例）03-XXXX-XXXX" %>
+      </label>
+      <label>
+        メールアドレス
+        <%= form.email_field :email, placeholder: "例）info@example.jp" %>
+      </label>
+      <label>
+        WebサイトURL
+        <%= form.url_field :website_url, placeholder: "例）https://www.example.jp" %>
+      </label>
+      <label>
+        受付時間
+        <%= form.text_field :reception_hours, placeholder: "例）平日 9:00〜18:00" %>
+      </label>
+      <label class="wide">
+        会社住所
+        <%= form.text_area :address, rows: 3, placeholder: "例）〒000-0000 東京都..." %>
+      </label>
+      <label>
+        信頼情報
+        <%= form.text_area :credibility, rows: 4, placeholder: "例）創業20年、累計施工実績5,000件以上" %>
+      </label>
+      <label>
+        配信停止文言
+        <%= form.text_area :opt_out_notice, rows: 4, placeholder: "例）本FAXがご不要な場合は..." %>
+      </label>
+    </div>
+  </section>
+
+  <section class="form-card confirm-card">
+    <h2>Step4 プロンプト確認</h2>
+    <label class="checkbox-row">
+      <%= check_box_tag :save_as_template, "1" %>
+      <span>この入力内容をテンプレートとして保存する</span>
+    </label>
+    <label>
+      テンプレートタイトル
+      <%= text_field_tag :template_title, nil, placeholder: "例）足場工事向けDM_基本パターン" %>
+    </label>
+  </section>
+
+  <div class="sticky-actions">
+    <%= link_to "戻る", manuscripts_path, class: "secondary-button" %>
+    <button type="submit" name="commit_action" value="draft" class="secondary-button" data-loading-message="下書きを保存中...">下書き保存</button>
+    <button type="submit" name="commit_action" value="generate" class="primary-button" data-loading-message="プロンプトを生成中...">プロンプトを生成する</button>
+  </div>
+<% end %>

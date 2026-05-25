@@ -1,0 +1,19 @@
+<header class="topbar">
+  <div class="company-switch">
+    <strong><%= current_company.name %></strong>
+    <span>⌄</span>
+  </div>
+
+  <div class="topbar-right">
+    <a href="#" class="help-link">？ ヘルプ</a>
+    <span class="notification-bell">♧<small>3</small></span>
+    <div class="user-chip">
+      <span class="avatar">○</span>
+      <span>
+        <strong><%= current_user.name %></strong>
+        <small><%= current_user.department.presence || "マーケティング部" %></small>
+      </span>
+    </div>
+    <%= button_to "ログアウト", logout_path, method: :delete, class: "text-button" %>
+  </div>
+</header>
